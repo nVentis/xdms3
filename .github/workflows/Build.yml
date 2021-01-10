@@ -1,6 +1,12 @@
-- name: Build
-  uses: andstor/jsdoc-action@v1
-  with:
-    source_dir: ./lib
-    recurse: true
-    output_dir: ./out
+name: Build
+on: [push]
+jobs:
+  check-bats-version:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create documentation
+    uses: andstor/jsdoc-action@v1
+    with:
+      source_dir: ./src
+      recurse: true
+      output_dir: ./out
