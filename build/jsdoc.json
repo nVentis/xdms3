@@ -1,0 +1,15 @@
+{
+	"source": {
+		"include": [
+			"lib/Entities"
+		],
+		"includePattern": ".+\\.(js(doc|x)?|mjs)$",
+		"excludePattern": "(^|\\/|\\\\)_"
+	},
+	"sourceType": "module",
+	"recurseDepth": 10,
+	"opts": {
+		"destination": "./docs/",
+		"recurse": true
+	}
+}
