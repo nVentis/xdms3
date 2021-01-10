@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: UDBIAdapters/IDB.mjs</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: UDBIAdapters/IDB.mjs</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * UDBI Adapter for IndexedDB
+ * @module UDBIAdapters/IDB
+ */
+
+import { UDBIDatabase, UDBITable } from "../UDBI/Core.mjs";
+import {ObjectManager} from "../UDBI/ObjectManager.mjs";
+import InvalidEntityException from "../Exceptions/InvalidEntityException.mjs";
+import InvalidStateException from "../Exceptions/InvalidStateException.mjs";
+import PersistentStorage from "../Client/PersistentStorage.mjs";
+import NotImplementedException from "../Exceptions/NotImplementedException.mjs";
+import InvalidTypeException from "../Exceptions/InvalidTypeException.mjs";
+import {EventNamespace} from "../Event/Namespace.mjs";
+
+// For keeping track of IDB versions
+let IDBRegister = new PersistentStorage("IDBDatabases");
+	IDBRegister.autoLoad = IDBRegister.autoSave = true;
+
+/**
+ * Keeps references of all currently open IDb databases
+  * @type {Object.&lt;string, IDBDatabase>}
+ */
+let IDBDatabases = {};
+
+/**
+ * Keeps track of version changes and replaces an object manager's database object where required
+ * @type {EventNamespace}
+ */
+let IDBDatabaseManipulator = new EventNamespace("IDBDatabaseManipulator");
+
+/**
+ * IDB Provider for nVentis UDBI
+ * Copyright 2020 by nVentis (SM), Bryan Bliewert
+ * @class
+ */
+
+class IDBUDBIDatabase extends UDBIDatabase {
+	/**
+	 * @constructor
+	 * @param {string} dbName Name of the database to be created. Directly maps to name of indexed DB
+	 */
+	constructor(dbName) {
+		super(dbName);
+
+		/** @type {window.indexedDB} **/
+		this.dbObject = null;
+
+		/** @type {number} **/
+		this.dbVersion = 1;
+
+		/** @type {function} **/
+		this.dbErrorHandler = console.log;
+	}
+
+	// TODO: Handle onupgrade / DB version changes
+
+	/**
+	 * @description Readies the database for operations
+	 * @param {number} [versionNumber] - Defaults to 1 per implementation standard
+	 * @param {function} [onUpgradeNeeded] - Only used for altering database structure
+	 */
+	Request(
+		versionNumber,
+		onUpgradeNeeded
+	) {
+		let Instance = this;
+		return new Promise(function (onSuccess, onError) {
+			let requestIndexedDB = function () {
+				if (window.indexedDB) {
+					let DBOpenRequest = window.indexedDB.open(Instance.dbName, versionNumber);
+
+					if (typeof onUpgradeNeeded === "function")
+						DBOpenRequest.onupgradeneeded = function () {
+							Instance.dbObject = DBOpenRequest.result;
+							Instance.dbVersion = DBOpenRequest.result.version
+							Instance.dbObject.onerror = Instance.dbErrorHandler;
+
+							onUpgradeNeeded(Instance);
+						};
+
+					DBOpenRequest.onerror = onError;
+					DBOpenRequest.onsuccess = function () {
+						Instance.dbObject = DBOpenRequest.result;
+						Instance.dbVersion = DBOpenRequest.result.version
+						Instance.dbObject.onerror = Instance.dbErrorHandler;
+
+						return onSuccess(Instance);
+					}
+				} else
+					return onError("indexedDB not supported by browser");
+			}
+
+			if (Instance.Config.Persistence) {
+				if (navigator.storage &amp;&amp; navigator.storage.persist)
+					navigator.storage.persist().then(function (persistent) {
+						if (persistent)
+							return requestIndexedDB();
+						else
+							return onError("Storage may be cleared by the UA under storage pressure.");
+					});
+			}
+		});
+
+
+	}
+
+	/**
+	 * @description Lists all stores managed by this provider
+	 * @returns {Promise&lt;Array>}
+	 */
+	Tables() {
+		let Instance = this;
+		return new Promise(function (onSuccess, onError) {
+			return onSuccess(Instance.dbObject.objectStoreNames());
+		});
+	}
+
+	/**
+	 * @description Creates a new database table
+	 * @param {string} tableName
+	 * @param {UDBITableDescriptor} tableDescriptor
+	 * @returns {Promise&lt;Database>}
+	 */
+	tableCreate(tableName, tableDescriptor){
+		let Instance = this;
+		return new Promise(function (onSuccess, onError) {
+			Instance._reconnect(/** @param {Database} UDBIProviderIDB **/ function (UDBIProviderIDB) {
+				// Seek until PK is found
+				let PKFound = false,
+					PKKey,
+					Keys = [];
+				for (let cKey in tableDescriptor) {
+					if (tableDescriptor[cKey].PK) {
+						PKFound = cKey;
+						Keys.push(cKey);
+					}
+
+					if (tableDescriptor[cKey].Key)
+						Keys.push(cKey);
+				}
+
+				if (!PKFound)
+					return onError("Invalid table scheme");
+
+				// Construct createObjectStore object
+				let creationObject = {};
+
+				// Use AI if required, otherwise create unique key from PK+Key fields
+				if (tableDescriptor[PKKey].AI) {
+					creationObject.autoIncrement = true;
+					creationObject.keyPath = PKKey;
+				} else
+					creationObject.keyPath = Keys;
+
+				let Store = Instance.dbObject.createObjectStore(tableName, creationObject),
+					Columns = {};
+
+				for (let Key in tableDescriptor) {
+					// Skip PK and Key fields
+					let cEntry = tableDescriptor[Key];
+					if (cEntry.PK || cEntry.Key)
+						continue;
+
+					let isUnique = !!cEntry.Key || !!cEntry.Unique;
+
+					Columns[Key] = {
+						Index: Store.createIndex("by_" + Key, Key, { unique: isUnique })
+					}
+				}
+
+				return onSuccess({
+					Columns: Columns,
+					Store: Store
+				});
+			}).then(onSuccess, onError);
+		});
+	}
+
+	/**
+	 * @description Reconnects to the current store, and, optionally, allow altering the store structure
+	 * @param {function} [onUpgradeNeeded]
+	 * @returns {Promise&lt;Database>}
+	 */
+	_reconnect(onUpgradeNeeded){
+		let Instance = this;
+		return new Promise(function (onSuccess, onError) {
+			if (Instance.dbObject) {
+				Instance.dbObject.close();
+
+				if (onUpgradeNeeded &amp;&amp; onUpgradeNeeded instanceof Function) {
+					return Instance.Request(Instance.dbVersion + 1, onUpgradeNeeded).then(onSuccess, onError);
+				} else
+					return onSuccess(Instance);
+			} else
+				return onError("No connection established");
+		});
+	}
+}
+
+/**
+ * IDB Table for nVentis UDBI
+ * Copyright 2020 by nVentis (SM), Bryan Bliewert
+ * @class
+ */
+
+class IDBTable extends UDBITable {
+	constructor() {
+		super();
+	}
+
+	/** @inheritDoc */
+	Read(a, b){
+
+	}
+
+	/** @inheritDoc */
+	Write(a, b){
+
+	}
+
+	/** @inheritDoc */
+	Update(a, b){
+
+	}
+
+	/** @inheritDoc */
+	Exist(a, b){
+
+	}
+
+	/** @inheritDoc */
+	Delete(a, b){
+
+	}
+}
+
+
+/**
+ * A class representing a primary to be created for a ManagedEntity
+ * @class
+ */
+class IDBObjectManagerPrimaryKey {
+	/**
+	 * See https://developer.mozilla.org/en-US/docs/Web/API/IDBDatabase/createObjectStore#Parameters optionalParameters
+	 * @param {string|array} keyPath - If an array key path was supplied, it will be sorted according to alphabet automatically!
+	 * @param {boolean} autoIncrement
+	 */
+	constructor(
+		keyPath,
+		autoIncrement = false
+	) {
+		let This = this;
+
+		this.keyPath = keyPath;
+
+		if (this.keyPath &amp;&amp; this.keyPath instanceof Array)
+			this.keyPath = this.keyPath.sort();
+
+		/**
+		 * Returns true if the given Target object matches the primary key property/ies
+		 * @param {string|string[]} sortedKeyPath
+		 * @returns {boolean}
+		 */
+		this.keyPathMatches = function (sortedKeyPath) {
+			if (This.keyPath instanceof Array) {
+				for (let cI = 0; cI &lt; sortedKeyPath.length; cI++)
+					if (This.keyPath[cI] !== sortedKeyPath[cI])
+						return false;
+
+				return true;
+			} else
+				return This.keyPath === sortedKeyPath;
+		}
+
+		this.autoIncrement = autoIncrement;
+	}
+}
+
+/**
+ * One (out of a custom number) of index descriptors
+ * @class
+ */
+class IDBObjectManagerIndexEntry {
+	/**
+	 *
+	 * @param {string|array} keyPath - In most cases, the property name of a managed entity for which to create an index. For arrays, see Options.
+	 * @param {string} [Name=keyPath] - Name of the index to be created. If an array keyPath was supplied, a name is created by sorting the keyPath array
+	 *  alphabetically and joining the entries by "_". Any supplied name will be overwritten to ensure consistency
+	 * @param {boolean} [isUnique=false]
+	 * @param {object} Options - See https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/createIndex#Parameters
+	 */
+	constructor(
+		keyPath,
+		Name,
+		isUnique = false,
+		Options
+	) {
+		if (typeof Options !== "object")
+			Options = {};
+
+		Options.unique = !!isUnique;
+
+		if (keyPath &amp;&amp; keyPath instanceof Array) {
+			keyPath.sort();
+			Name = keyPath.join("_");
+		}
+
+		this.keyPath = keyPath;
+
+		this.Name = Name || keyPath;
+		this.Options = Options;
+	}
+}
+
+/**
+ * A generic class for use with IDBObjectManager
+ * @class
+ */
+class IDBObjectManagerIndex {
+	/**
+	 * Represents an index for use with IDBObjectManager
+	 * @param {function} ManagedEntity
+	 */
+	constructor(ManagedEntity) {
+		this.ManagedEntity = ManagedEntity;
+
+		/**
+		 *
+		 * @type {IDBObjectManagerIndexEntry[]}
+		 */
+		this.Entries = [];
+
+		/**
+		 *
+		 * @type {Object.&lt;string,IDBObjectManagerIndexEntry>}
+		 */
+		this.Dictionary = {};
+	}
+}
+
+/**
+ * An index with custom values
+ * @class
+ */
+class IDBObjectManagerCustomIndex extends IDBObjectManagerIndex{
+	/**
+	 *
+	 * @param {function} ManagedEntity
+	 * @param {IDBObjectManagerIndexEntry[]} IndexEntries
+	 */
+	constructor(
+		ManagedEntity,
+		IndexEntries
+	) {
+		super(ManagedEntity);
+
+		var This = this;
+
+		IndexEntries.forEach(function (cEntry) {
+			if (!(cEntry instanceof IDBObjectManagerIndexEntry))
+				throw new InvalidEntityException("cEntry");
+
+			This.Entries.push(cEntry);
+			This.Dictionary[cEntry.Name] = cEntry;
+		});
+	}
+}
+
+/**
+ * A general-purpose index for use with IDBObjectManager. Uses one auto-incrementing ID field with custom name, and allows further ID entries
+ * @class
+ */
+class IDBObjectManagerGeneratedIndex extends IDBObjectManagerIndex{
+	/**
+	 * Will create an index based on supplied properties. When using this index, they are assumed all to be not unique
+	 * @param {function} ManagedEntity
+	 * @param {array} Properties - All entries are interpreted as name and keyPath values of the index to be created
+	 */
+	constructor(
+		ManagedEntity,
+		Properties
+	) {
+		super(ManagedEntity);
+
+		var This = this;
+		this.ManagedEntity = ManagedEntity;
+
+		Properties.forEach(function (cProperty) {
+			This.Entries.push(new IDBObjectManagerIndexEntry(cProperty, cProperty));
+		});
+
+		this.Entries;
+	}
+}
+
+/**
+ * Contains database schema information as well as the database project itself
+ * @class
+ */
+class IDBDatabaseReference {
+	constructor(databaseName) {
+		this.addSchema = function () {
+
+		}
+
+	}
+}
+
+class IDBObjectManager extends ObjectManager {
+	/**
+	 *
+	 * @param {function} ManagedEntity
+	 * @param {string} databaseName
+	 * @param {IDBObjectManagerPrimaryKey} [PrimaryKey] - Only used when database is created
+	 * @param {IDBObjectManagerIndex} [Index] - Only used when database is created
+	 */
+	constructor(
+		ManagedEntity,
+		databaseName,
+		PrimaryKey,
+		Index
+	) {
+		super(ManagedEntity, ManagedEntity.name);
+
+		let Manager = this;
+
+		/** @type {string} */
+		this.dbName = databaseName;
+
+		/** @type {IDBDatabase} **/
+		this.dbObject = null;
+
+		// /** @type {IDBObjectStore} */
+		// this.dbStore = null;
+
+		/** @type {number} **/
+		this.dbVersion = 1;
+
+		/** @type {function} **/
+		this.dbErrorHandler = console.log;
+
+		/** @type {boolean} */
+		this.Persistence = true;
+
+		/**
+		 * @type {IDBObjectManagerPrimaryKey}
+		 */
+		this.PrimaryKey = PrimaryKey;
+
+		/**
+		 * @type {IDBObjectManagerIndex}
+		 */
+		this.Index = Index;
+
+		/**
+		 *
+		 * @param {IDBDatabase|undefined} [IDBInstance]
+		 * @returns {Promise&lt;IDBObjectManager>}
+		 */
+		this.Request = async function (IDBInstance) {
+			await IDBRegister.Load();
+
+			if (IDBInstance &amp;&amp; IDBInstance.name !== databaseName)
+				return new InvalidStateException("IDBInstance");
+
+			/**
+			 * Called when the database is ready for use. Also attaches
+			 * a handler for when the database to be replaced in order
+			 * to allow JIT upgrades
+			 * @param {IDBDatabase} IDBInstance
+			 * */
+			let Finalize = function (IDBInstance) {
+				return new Promise(function (onSuccess, onError) {
+					let cVersion = IDBInstance.version;
+
+					Manager.dbObject = IDBInstance;
+					Manager.dbVersion = IDBInstance.version;
+					Manager.dbObject.onerror = Manager.dbErrorHandler;
+					Manager.dbObject.onversionchange = function () {
+						//console.log("VersionChange");
+						// Subscribe for new database available
+						IDBDatabaseManipulator.When(
+							"dbUpgrade",
+							function (IDBInstance) {
+								Finalize(IDBInstance).then(function () {
+									console.log("Updated IDB reference");
+								}, console.log);
+							},
+							true,
+							/**
+							 * Only update if current database is upgraded
+							 * @param {IDBDatabase} IDBInstance
+							 */
+							function (IDBInstance) {
+								return (
+									IDBInstance.name === databaseName &amp;&amp;
+									IDBInstance.version !== cVersion
+								);
+							}
+						);
+
+						// Save unsaved data and close db (to allow further upgrades)
+						// Other function execution (adding new stores etc.) will only continue after this!
+						Manager.Flush().then(function () {
+							Manager.dbObject.close();
+						}, function (errorInfo) {
+							console.log(errorInfo);
+							Manager.dbObject.close();
+						});
+					}
+
+					IDBRegister.Set(databaseName, Manager.dbVersion).then(function () {
+						IDBDatabases[databaseName] = IDBInstance;
+						return onSuccess(Manager);
+					}, onError);
+				});
+			}
+
+			let setupIDB = function (event) {
+				/** @type {IDBObjectStore} */
+				let IDB = event.target.result;
+				IDB.onerror = Manager.dbErrorHandler;
+
+				/** @type {IDBObjectStore} */
+				let objectStore = IDB.createObjectStore(Manager.Name, PrimaryKey),
+					indexEntries = Index.Entries;
+
+				for (let cI = 0; cI &lt; indexEntries.length; cI++) {
+					/** @type {IDBObjectManagerIndexEntry} */
+					let cEntry = indexEntries[cI];
+
+					// Throw error if a compund index uses the primary key value
+					// This is not allowed per specification, create a separate property+index for
+					// this purpose (12.04.2020)
+					if (
+						/* index string, PK string */ cEntry.keyPath === "string" &amp;&amp; PrimaryKey.keyPathMatches(cEntry.keyPath) ||
+						/* index array, PK string */ (cEntry.keyPath instanceof Array &amp;&amp; typeof PrimaryKey.keyPath === "string" &amp;&amp; cEntry.keyPath.includes(PrimaryKey.keyPath)) ||
+						/* index array, PK array */ JSON.stringify(cEntry.keyPath) === JSON.stringify(PrimaryKey.keyPath)
+					)
+						throw new InvalidStateException("cEntry");
+
+					objectStore.createIndex(cEntry.Name, cEntry.keyPath, cEntry.Options);
+				}
+			}
+
+			/**
+			 *
+			 * @param {IDBDatabase} IDBInstance
+			 * @param {number} [versionNumber] - When not supplied, will automatically either assume to continue the existing version
+			 *  number of automatically increase it in order to create a new store managing ManagedEntity
+			 *  @returns {Promise&lt;IDBObjectManager>}
+			 */
+			let requestIndexedDB = function (IDBInstance, versionNumber) {
+				return new Promise(function (onSuccess, onError) {
+					if (window.indexedDB) {
+						// Check if reference to IDB database already exists - use that if possible
+						if (IDBDatabases[databaseName] &amp;&amp; !IDBInstance)
+							IDBInstance = IDBDatabases[databaseName];
+
+						//console.log([IDBInstance, versionNumber]);
+
+						if (versionNumber) {
+							let DBOpenRequest = window.indexedDB.open(databaseName, versionNumber);
+							//console.log("Version number supplied [" + versionNumber + "]");
+
+							/*
+							setInterval(function () {
+								console.log(DBOpenRequest);
+							}, 2000);
+							*/
+
+							DBOpenRequest.onupgradeneeded = setupIDB;
+							DBOpenRequest.onerror = onError;
+							DBOpenRequest.onsuccess = function () {
+								return Finalize(DBOpenRequest.result).then(function (Manager) {
+									//console.log(Manager);
+									return onSuccess(Manager);
+								}, onError);
+							};
+						} else {
+							// Check if an IDB instance is already supplied
+							// If yes, check if it already contains this store
+							// If yes, finish
+							// If not, execute requestIndexDB again, but with the current versionNumber + 1, indicating an update
+							// If not, retrieve the current version from localStorage
+
+							if (IDBInstance &amp;&amp; (IDBInstance instanceof IDBDatabase)) {
+								let currentStores = IDBInstance.objectStoreNames;
+								//console.log([currentStores, Manager.Name]);
+								if (currentStores.contains(Manager.Name)) {
+									//console.log("Setting dbVersion to [" + IDBInstance.version + "]");
+
+									return Finalize(IDBInstance).then(onSuccess, onError);
+								} else {
+									// Database exists but store does not - Update (version change) required
+									// Also issue an Upgrade event to update existing ObjectManagers
+									//console.log("Increasing version number from [" + IDBInstance.version + "] to [" + (IDBInstance.version + 1) + "]");
+									return requestIndexedDB(IDBInstance, IDBInstance.version + 1).then(function () {
+										IDBDatabaseManipulator.Then("dbUpgrade", Manager.dbObject).then(function () {
+											return onSuccess(Manager);
+										});
+									}, onError);
+								}
+							} else {
+								IDBRegister.Get(databaseName).then(function (currentVersion) {
+									//console.log("currentVersion [" + currentVersion + "]");
+									currentVersion = currentVersion || 1;
+									//console.log("currentVersion [" + currentVersion + "]");
+
+									return requestIndexedDB(null, currentVersion).then(onSuccess, onError);
+								}, onError);
+							}
+						}
+					} else
+						return onError(new InvalidStateException("indexedDB not supported by browser"));
+				});
+			}
+
+			if (Manager.Persistence) {
+				if (navigator.storage &amp;&amp; navigator.storage.persist) {
+					var persistent = await navigator.storage.persist();
+					if (persistent)
+						return await requestIndexedDB(IDBInstance);
+					else
+						throw new InvalidStateException("navigator.storage.persist");
+				}
+			}
+		}
+
+		/**
+		 * @type {QueueEntry[]}
+		 */
+		let Queue = [];
+
+		/**
+		 * An entry in the ORM queue
+		 * @param {object} ManagableEntityInstance
+		 * @param {number} Type - 0: Delete, 1: Put
+		 * @constructor
+		 */
+		let QueueEntry = function (
+			ManagableEntityInstance,
+			Type
+		) {
+			this.EntityInstance = ManagableEntityInstance;
+			this.Type = Type;
+		}
+
+		const
+			QUEUE_ENTRY_TYPE_DELETE = 0,
+			QUEUE_ENTRY_TYPE_PUT = 1,
+			QUEUE_ENTRY_TYPE_ADD = 2;
+
+		/**
+		 * Prepares an instance of ManageableEntity for update/addition to the database. Use .Flush() to apply changes
+		 * @param {object} ManagableEntityInstance - Will be checked for valid primary key, if possible. I.e., if autoIncrement was selected,
+		 *  but the object contains a property with the same name, it will be deleted so the database can keep track of ID generation.
+		 * @returns {Promise&lt;boolean>}
+		 */
+		this.Persist = async function (ManagableEntityInstance) {
+			if (!(ManagableEntityInstance instanceof Manager.ManagedEntity))
+				throw new InvalidEntityException("ManagableEntityInstance");
+
+			// TODO: Fix PrimaryKey multi-key entries
+			if (Manager.PrimaryKey.autoIncrement &amp;&amp; Manager.PrimaryKey.keyPath) {
+				if (typeof Manager.PrimaryKey.keyPath === "string") {
+					// ...only delete the property if its not valid
+					if (typeof ManagableEntityInstance[Manager.PrimaryKey.keyPath] !== "number")
+						delete ManagableEntityInstance[Manager.PrimaryKey.keyPath];
+				} else if (Manager.PrimaryKey.keyPath instanceof Array) {
+					// TODO: Handle multi-entry keyPath entries
+					throw new NotImplementedException("keyPath Array");
+				} else
+					throw new InvalidTypeException("keyPath");
+			}
+
+			// Remove all functions
+			for (let Property in ManagableEntityInstance)
+				if (typeof ManagableEntityInstance[Property] === "function")
+					delete ManagableEntityInstance[Property];
+
+			Queue.push(new QueueEntry(
+				ManagableEntityInstance,
+				QUEUE_ENTRY_TYPE_PUT
+			));
+
+			return true;
+		}
+
+		/**
+		 * Create an instance of the ManagedEntity. Note that its constructor may be designed to support this (otherwise: set via supplied PrimaryKey?)
+		 * @param PrimaryKeyValue
+		 * @returns {object}
+		 */
+		this.getReference = function (PrimaryKeyValue) {
+			let ManagedEntityInstance = new Manager.ManagedEntity();
+			Manager._setPrimaryKeyValue(ManagedEntityInstance, PrimaryKeyValue);
+
+			return ManagedEntityInstance;
+		}
+
+		/**
+		 * Helper method for getting the PrimaryKey of an entity
+		 * @param {object} ManagableEntityInstance
+		 * @returns {*}
+		 */
+		this._getPrimaryKeyValue = function (ManagableEntityInstance) {
+			if (!(ManagableEntityInstance instanceof ManagedEntity))
+				throw new InvalidEntityException("ManagableEntityInstance");
+
+			let PKKeyPath = PrimaryKey.keyPath;
+
+			if (!(PKKeyPath instanceof Array)) {
+				return ManagableEntityInstance[PKKeyPath];
+			} else
+				throw new NotImplementedException("PKKeyPath Array");
+		}
+
+		/**
+		 * Helper method for setting the PrimaryKey of an entity
+		 * @param {object} ManagableEntityInstance
+		 * @param PrimaryKeyValue
+		 */
+		this._setPrimaryKeyValue = function (ManagableEntityInstance, PrimaryKeyValue) {
+			if (!(ManagableEntityInstance instanceof ManagedEntity))
+				throw new InvalidEntityException("ManagableEntityInstance");
+
+			let PKKeyPath = PrimaryKey.keyPath;
+
+			if (!(PKKeyPath instanceof Array)) {
+				ManagableEntityInstance[PKKeyPath] = PrimaryKeyValue;
+			} else
+				throw new NotImplementedException("PKKeyPath Array");
+		}
+
+
+		/**
+		 * Executes the queue and adds/updates all pending changes to the database
+		 * @returns {Promise&lt;boolean>}
+		 */
+		this.Flush = async function () {
+			if (!Queue.length)
+				return true;
+
+			// Create Promises array from queue
+			let Promises = Queue.map(function (cQueueEntry) {
+				return new Promise(function (onSuccess, onError) {
+					let cTransaction = Manager.dbObject.transaction(Manager.Name, "readwrite"),
+						storeObject = cTransaction.objectStore(Manager.Name),
+						ManagedEntityInstance = cQueueEntry.EntityInstance,
+						Type = cQueueEntry.Type,
+						Request;
+
+					if (Type === 0) // .delete() requires a primary key value to be supplied - get this using _getPrimaryKeyValue(); these are checked already before in Delete()
+						Request = storeObject.delete(Manager._getPrimaryKeyValue(ManagedEntityInstance));
+					else if (Type === 1)
+						Request = storeObject.put(ManagedEntityInstance);
+					else if (Type === 2)
+						Request = storeObject.add(ManagedEntityInstance);
+					else
+						return onError("Invalid Type");
+
+					Request.onsuccess = onSuccess;
+					Request.onerror = onError;
+				});
+			});
+
+			// Clear queue
+			Queue.length = 0;
+
+			for (const cPromise of Promises) {
+				let cPromiseResult = await cPromise;
+				if (!cPromiseResult)
+					return false;
+			}
+
+			return true;
+		}
+
+
+		let capitalize = function (str) {
+			return str.charAt(0).toUpperCase() + str.slice(1);
+		}
+
+		/**
+		 * Retrieves the name of the index associated to the requested properties (especially important for multi condition queries).
+		 * Returns null only if the primary key matches the requested properties
+		 * @param {object} Target
+		 * @returns {null|undefined|string} - Null for PrimaryKey. string for an index name. undefined otherwise (non-existent)
+		 */
+		this.targetObjectToIndexSource = function (Target) {
+			// If the PrimaryKey was created using a keyPath, see if that suffices
+			if (/*PrimaryKey.keyPath &amp;&amp;*/ PrimaryKey.keyPathMatches(Target)) {
+				return null;
+			} else {
+				// See if an index using the expected name exists
+				let Properties = Object.keys(Target).sort(),
+					expectedIndexName = Properties.join("_");
+
+				if (Index.Dictionary[expectedIndexName]) {
+					return expectedIndexName;
+				} else
+					return undefined;
+			}
+		}
+
+		let
+			/**
+			 * Helper function to construct the ManagedEntity using data loaded from the database
+			 * @param {object} entityData
+			 * @returns {object}
+			 */
+			constructEntitiy = function (entityData) {
+				let EntityInstance = new ManagedEntity();
+				for (let Property in entityData) {
+					// Use setter function (if possible)
+					if (typeof EntityInstance["set" + capitalize(Property)] === "function")
+						EntityInstance["set" + capitalize(Property)](entityData[Property]);
+					else
+						EntityInstance[Property] = entityData[Property];
+				}
+
+				return EntityInstance;
+			},
+			/**
+			 * Array variant of constructEntity
+			 * @param {Object[]} entityDataArray
+			 * @returns {Object[]}
+			 */
+			constructEntities = function (entityDataArray) {
+				return entityDataArray.map(constructEntitiy);
+			};
+
+		/** @inheritDoc */
+		this.findBy = function (
+			Target,
+			orderDesc,
+			Limit,
+			getPrimaryKeyOnly = false // TODO: Implement this using openKeyCursor
+		) {
+			return new Promise(function (onSuccess, onError) {
+				// Sorting properties is crucial
+				let targetKeys = Object.keys(Target);
+					targetKeys.sort();
+
+				if (!targetKeys.length)
+					return onError(new InvalidTypeException("Target"));
+
+				// If only one property is selected, use getAll
+				let Request;
+				if (targetKeys.length === 1) {
+					let sourceObject,
+						Field = targetKeys[0],
+						Value = Target[targetKeys[0]];
+
+					// console.log([Field, PrimaryKey.keyPath, Index.Dictionary]);
+					if (Field === PrimaryKey.keyPath) {
+						// Search directly on the primary key using IDBStore.getAll()
+						let cTransaction = Manager.dbObject.transaction(Manager.Name, "readonly"),
+							storeObject = cTransaction.objectStore(Manager.Name);
+
+						sourceObject = storeObject;
+					} else if (Index.Dictionary[Field]) {
+						let cIndexEntry = Index.Dictionary[Field],
+							cTransaction = Manager.dbObject.transaction(Manager.Name, "readonly"),
+							storeObject = cTransaction.objectStore(Manager.Name),
+							indexObject = storeObject.index(cIndexEntry.Name);
+
+						//console.log([cIndexEntry.Name, Field, Value]);
+
+						sourceObject = indexObject;
+					} else
+						return onError(new InvalidTypeException("Field"));
+
+					Request = sourceObject.getAll(Value, Limit);
+					Request.onerror = onError;
+					Request.onsuccess = function () {
+						// console.log([a, Request]);
+						if (typeof Request.result !== "undefined" &amp;&amp;
+							Request.result !== null) {
+							//console.log(Request.result);
+							if (!(Request.result instanceof Array))
+								return onSuccess(constructEntities([Request.result]));
+							else
+								return onSuccess(constructEntities(Request.result));
+						} else
+							return onSuccess([]);
+					}
+
+				} else {
+					let cQuery = new IDBObjectQuery({
+						Exact: Target,
+						Limit: Limit
+					});
+
+					return cQuery.Resolve().then(onSuccess, onError);
+				}
+			});
+		}
+
+		/**
+		 * Parses a target object into a form IndexedDB can directly handle
+		 * @param {object|string|number} targetObject
+		 * @returns []|string|number
+		 */
+		let parseTargetValue = function (targetObject) {
+			let	targetKeys = Object.keys(targetObject);
+				targetKeys.sort();
+
+			if (targetKeys.length === 1) {
+				return targetObject[targetKeys[0]]
+			} else {
+				let valueArray = []
+				for (let cI = 0; cI &lt; targetKeys.length; cI++)
+					valueArray.push(targetObject[targetKeys[cI]]);
+
+				return valueArray;
+			}
+		}
+
+		/**
+		 * @typedef {object} queryDefinition
+		 * @property {object} [Exact]
+		 * @property {object} [Lower]
+		 * @property {object} [Upper]
+		 * @property {boolean} [includeLower=true]
+		 * @property {boolean} [includeUpper=true]
+		 * @property {number} [Limit]
+		 */
+
+		/**
+		 * A helper class for executing basic IDB selection operations
+		 * @class
+		 */
+		class IDBObjectQuery {
+			/**
+			 * @param {queryDefinition} Definition
+			 */
+			constructor(Definition) {
+				var This = this;
+
+				if (!Definition)
+					throw new InvalidTypeException("Definition");
+
+				if (typeof Definition.includeLower === "undefined")
+					Definition.includeLower = true;
+
+				if (typeof Definition.includeUpper === "undefined")
+					Definition.includeUpper = true;
+
+				this.Definition = Definition;
+
+				/**
+				 * @type {IDBKeyRange}
+				 */
+				this.keyRange = null;
+
+				if (Definition.Exact)
+					this.keyRange = IDBKeyRange.only(parseTargetValue(Definition.Exact));
+				else if (Definition.Lower) {
+					if (Definition.Upper)
+						this.keyRange = IDBKeyRange.bound(
+							parseTargetValue(Definition.Lower),
+							parseTargetValue(Definition.Upper),
+							!Definition.includeLower,
+							!Definition.includeUpper
+						);
+					else
+						this.keyRange = IDBKeyRange.lowerBound(
+							parseTargetValue(Definition.Lower),
+							!Definition.includeLower
+						);
+				} else if (Definition.Upper)
+					this.keyRange = IDBKeyRange.upperBound(
+						parseTargetValue(Definition.Upper),
+						!Definition.includeUpper
+					);
+				else
+					throw new InvalidTypeException("Definition");
+
+				// Construct index / source name
+				this.dataSource = Manager.targetObjectToIndexSource(Definition.Exact || Definition.Lower || Definition.Upper);
+				this.Resolve = function () {
+					return Manager.resolveQuery(This);
+				}
+				this.Limit = Definition.Limit;
+			}
+		}
+		this.Query = IDBObjectQuery;
+
+		/**
+		 * Attempts to resolve a Manager.Query
+		 * @param {IDBObjectQuery} Query
+		 * @returns {Promise&lt;object[]>}
+		 */
+		this.resolveQuery = function (Query) {
+			return new Promise(function (onSuccess, onError) {
+				let dataSource = Query.dataSource,
+					Limit = Query.Limit,
+					Request;
+
+				// Requires multi-entry key path setup for this exact query
+				// Uses IDBKeyRange()
+				if (dataSource === undefined)
+					return onError(new InvalidStateException("dataSource"));
+				else {
+					let cTransaction = Manager.dbObject.transaction(Manager.Name, "readonly"),
+						storeObject = cTransaction.objectStore(Manager.Name);
+
+					if (dataSource === null) {
+						// Search in PrimaryKey
+						Request = storeObject.openCursor(Query.keyRange);
+					} else {
+						// Search in given index
+						let indexName = dataSource,
+							indexObject = storeObject.index(indexName);
+
+						Request = indexObject.openCursor(Query.keyRange);
+					}
+				}
+
+				let Results = [];
+				Request.onerror = onError;
+				Request.onsuccess = function (e) {
+					/** @type {IDBCursor} */
+					const cursor = e.target.result;
+
+					if (cursor) {
+						Results.push(cursor.value);
+
+						if (typeof Limit !== "number" || Results.length &lt; Limit)
+							return cursor.continue();
+						else
+							return onSuccess(constructEntities(Results));
+
+					} else
+						return onSuccess(constructEntities(Results));
+				};
+			});
+		}
+
+		/**
+		 * Deletes an existing object from the store
+		 * @param {object} ManagedEntityInstance
+		 * @returns {Promise&lt;boolean>}
+		 */
+		this.Delete = async function (ManagedEntityInstance) {
+			if (!(ManagedEntityInstance instanceof Manager.ManagedEntity))
+				throw new InvalidEntityException("ManagedEntityInstance");
+
+			let PKValue = Manager._getPrimaryKeyValue(ManagedEntityInstance);
+			if (PKValue === undefined)
+				throw new InvalidStateException("ManagedEntityInstance PK")
+
+			Queue.push(new QueueEntry(
+				ManagedEntityInstance,
+				QUEUE_ENTRY_TYPE_DELETE
+			));
+
+			return true;
+		}
+
+
+
+
+	}
+}
+
+export {
+	IDBUDBIDatabase,
+	IDBTable,
+	IDBObjectManager,
+	IDBObjectManagerIndex,
+	IDBObjectManagerIndexEntry,
+	IDBObjectManagerCustomIndex,
+	IDBObjectManagerGeneratedIndex,
+	IDBObjectManagerPrimaryKey
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="Client_StoreReducable%250ASee%2520classmodule_.html">Client/StoreReducable
+See class</a></li><li><a href="Client_UI_AssetManager%250ASee%2520classmodule_.html">Client/UI/AssetManager
+See class</a></li><li><a href="Client_UI_AssetType%250DSee%2520classmodule_.html">Client/UI/AssetTypeSee class</a></li><li><a href="Entities_Config_ConfigSet%250DSee%2520class%2520descriptionmodule_.html">Entities/Config/ConfigSetSee class description</a></li><li><a href="module-Client_ComponentConnectorInterface.html">Client/ComponentConnectorInterface</a></li><li><a href="module-Client_ComponentConnectorReducable.html">Client/ComponentConnectorReducable</a></li><li><a href="module-Client_Store.html">Client/Store</a></li><li><a href="module-Client_UI_Components_EntityListInterface.html">Client/UI/Components/EntityListInterface</a></li><li><a href="module-Client_UI_Components_PropertyToggleInterface.html">Client/UI/Components/PropertyToggleInterface</a></li><li><a href="module-Client_UI_ReactableDOMInterface.html">Client/UI/ReactableDOMInterface</a></li><li><a href="module-Client_UI_ReactableInterface.html">Client/UI/ReactableInterface</a></li><li><a href="module-Client_UI_UIXAlert.html">Client/UI/UIXAlert</a></li><li><a href="module-Client_UI_UIXElement.html">Client/UI/UIXElement</a></li><li><a href="module-Client_UI_UIXGenericContainer.html">Client/UI/UIXGenericContainer</a></li><li><a href="module-Client_UI_UIXTemplate.html">Client/UI/UIXTemplate</a></li><li><a href="module-Client_UI_ViewComponent.html">Client/UI/ViewComponent</a></li><li><a href="module-Client_UI_ViewFragment.html">Client/UI/ViewFragment</a></li><li><a href="module-Client_UI_xInteraction.html">Client/UI/xInteraction</a></li><li><a href="module-Communication_CommunicationDataRequest.html">Communication/CommunicationDataRequest</a></li><li><a href="module-Core_IDGenerator.html">Core/IDGenerator</a></li><li><a href="module-Core_IDGeneratorNumeric.html">Core/IDGeneratorNumeric</a></li><li><a href="module-Core_ProtectedNamespace.html">Core/ProtectedNamespace</a></li><li><a href="module-Core_UniqueNamespace.html">Core/UniqueNamespace</a></li><li><a href="module-Entities_Client_PersistentStorage.html">Entities/Client/PersistentStorage</a></li><li><a href="module-Entities_Communication_CommunicationSocket.html">Entities/Communication/CommunicationSocket</a></li><li><a href="module-Entities_Communication_DataEndpointInterface.html">Entities/Communication/DataEndpointInterface</a></li><li><a href="module-Entities_Communication_DataEndpointInterfaceRW.html">Entities/Communication/DataEndpointInterfaceRW</a></li><li><a href="module-Entities_Core_FlectionProvider.html">Entities/Core/FlectionProvider</a></li><li><a href="module-Entities_Event_Namespace.html">Entities/Event/Namespace</a></li><li><a href="module-Exceptions_AccessDeniedException.html">Exceptions/AccessDeniedException</a></li><li><a href="module-Exceptions_GenericException.html">Exceptions/GenericException</a></li><li><a href="module-Exceptions_InvalidEntityException.html">Exceptions/InvalidEntityException</a></li><li><a href="module-Exceptions_InvalidStateException.html">Exceptions/InvalidStateException</a></li><li><a href="module-Exceptions_InvalidTypeException.html">Exceptions/InvalidTypeException</a></li><li><a href="module-Exceptions_NotFoundException.html">Exceptions/NotFoundException</a></li><li><a href="module-Exceptions_NotImplementedException.html">Exceptions/NotImplementedException</a></li><li><a href="module-Exceptions_RequestTimeoutException.html">Exceptions/RequestTimeoutException</a></li><li><a href="module-Exceptions_UnexpectedIdentifierException.html">Exceptions/UnexpectedIdentifierException</a></li><li><a href="module-Exceptions_UniquenessViolationException.html">Exceptions/UniquenessViolationException</a></li><li><a href="module-ObjectList.html">ObjectList</a></li><li><a href="module-Server_ConnectionProvider.html">Server/ConnectionProvider</a></li><li><a href="module-Server_ConnectionProviderSIO.html">Server/ConnectionProviderSIO</a></li><li><a href="module-Server_ConnectionProviderTLS.html">Server/ConnectionProviderTLS</a></li><li><a href="module-Server_IDGeneratorUUIDv4.html">Server/IDGeneratorUUIDv4</a></li><li><a href="module-Server_PersistentStorageFS.html">Server/PersistentStorageFS</a></li><li><a href="module-Storage_GenericStorage.html">Storage/GenericStorage</a></li><li><a href="module-UDBI_Core.html">UDBI/Core</a></li><li><a href="module-UDBI_EntityModel.html">UDBI/EntityModel</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeBigInteger.html">UDBI/FieldTypes/FieldTypeBigInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeFloat.html">UDBI/FieldTypes/FieldTypeFloat</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeGeneric.html">UDBI/FieldTypes/FieldTypeGeneric</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeInteger.html">UDBI/FieldTypes/FieldTypeInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeString.html">UDBI/FieldTypes/FieldTypeString</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeText.html">UDBI/FieldTypes/FieldTypeText</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp.html">UDBI/FieldTypes/FieldTypeTimestamp</a></li><li><a href="module-UDBI_ManyToOne.html">UDBI/ManyToOne</a></li><li><a href="module-UDBI_ObjectManager.html">UDBI/ObjectManager</a></li><li><a href="module-UDBI_OneToOne.html">UDBI/OneToOne</a></li><li><a href="module-UDBIAdapters_IDB.html">UDBIAdapters/IDB</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-This.html#.Request">Request</a></li><li><a href="-_anonymous_-This.Start.html">Start</a></li><li><a href="-_anonymous_-This.html#.Use">Use</a></li><li><a href="Client_StoreReducable%250ASee%2520classmodule_-PrefixedReducerManager.html">PrefixedReducerManager</a></li><li><a href="Client_StoreReducable%250ASee%2520classmodule_-StoreReducable.html">StoreReducable</a></li><li><a href="Client_UI_AssetManager%250ASee%2520classmodule_-AssetManager.html">AssetManager</a></li><li><a href="Client_UI_AssetType%250DSee%2520classmodule_-AssetType.html">AssetType</a></li><li><a href="CollectionEditor.html">CollectionEditor</a></li><li><a href="CookieStorage.html">CookieStorage</a></li><li><a href="Entities_Config_ConfigSet%250DSee%2520class%2520descriptionmodule_-ConfigSet.html">ConfigSet</a></li><li><a href="EntityDiffRequest.html">EntityDiffRequest</a></li><li><a href="EntityStorage.html">EntityStorage</a></li><li><a href="IllegalParallelEditException.html">IllegalParallelEditException</a></li><li><a href="LoginRequestInterface.html">LoginRequestInterface</a></li><li><a href="module.exports.html">exports</a></li><li><a href="module-Client_ComponentConnectorInterface-ComponentConnectorInterface.html">ComponentConnectorInterface</a></li><li><a href="module-Client_ComponentConnectorReducable-ComponentConnectorReducable.html">ComponentConnectorReducable</a></li><li><a href="module-Client_Store-PatchedStoreUpdate.html">PatchedStoreUpdate</a></li><li><a href="module-Client_Store-Store.html">Store</a></li><li><a href="module-Client_UI_UIXAlert-UIXAlert.html">UIXAlert</a></li><li><a href="module-Client_UI_UIXElement-UIXElement.html">UIXElement</a></li><li><a href="module-Client_UI_UIXGenericContainer-UIXGenericContainer.html">UIXGenericContainer</a></li><li><a href="module-Client_UI_UIXTemplate-UIXTemplate.html">UIXTemplate</a></li><li><a href="module-Client_UI_ViewComponent-ViewComponent.html">ViewComponent</a></li><li><a href="module-Client_UI_xInteraction-xInteraction.html">xInteraction</a></li><li><a href="module-Communication_CommunicationDataRequest-CommunicationDataRequest.html">CommunicationDataRequest</a></li><li><a href="module-Core_IDGeneratorNumeric-IDGeneratorNumeric.html">IDGeneratorNumeric</a></li><li><a href="module-Core_IDGenerator-IDGenerator.html">IDGenerator</a></li><li><a href="module-Core_UniqueNamespace-UniqueNamespace.html">UniqueNamespace</a></li><li><a href="module-Entities_Client_PersistentStorage.html">Entities/Client/PersistentStorage</a></li><li><a href="module-Entities_Communication_CommunicationSocket-CommunicationSocket.html">CommunicationSocket</a></li><li><a href="module-Entities_Communication_DataEndpointInterfaceRW-DataEndpointInterfaceRW.html">DataEndpointInterfaceRW</a></li><li><a href="module-Entities_Communication_DataEndpointInterface-DataEndpointInterface.html">DataEndpointInterface</a></li><li><a href="module-Entities_Event_Namespace-EventListenerEntry.html">EventListenerEntry</a></li><li><a href="module-Entities_Event_Namespace-EventNamespace_ListenerEntry.html">ListenerEntry</a></li><li><a href="module-Entities_Event_Namespace-EventNamespace_Register.html">Register</a></li><li><a href="module-Exceptions_AccessDeniedException.html">Exceptions/AccessDeniedException</a></li><li><a href="module-Exceptions_GenericException.html">Exceptions/GenericException</a></li><li><a href="module-Exceptions_InvalidEntityException.html">Exceptions/InvalidEntityException</a></li><li><a href="module-Exceptions_InvalidStateException.html">Exceptions/InvalidStateException</a></li><li><a href="module-Exceptions_InvalidTypeException.html">Exceptions/InvalidTypeException</a></li><li><a href="module-Exceptions_NotFoundException.html">Exceptions/NotFoundException</a></li><li><a href="module-Exceptions_NotImplementedException.html">Exceptions/NotImplementedException</a></li><li><a href="module-Exceptions_RequestTimeoutException.html">Exceptions/RequestTimeoutException</a></li><li><a href="module-Exceptions_UnexpectedIdentifierException.html">Exceptions/UnexpectedIdentifierException</a></li><li><a href="module-Exceptions_UniquenessViolationException.html">Exceptions/UniquenessViolationException</a></li><li><a href="module-ObjectList-ObjectList.html">ObjectList</a></li><li><a href="module-Server_ConnectionProviderTLS-ConnectionProviderTLS.html">ConnectionProviderTLS</a></li><li><a href="module-Server_ConnectionProvider-ConnectionProvider.html">ConnectionProvider</a></li><li><a href="module-Server_IDGeneratorUUIDv4-IDGeneratorUUIDv4.html">IDGeneratorUUIDv4</a></li><li><a href="module-Server_PersistentStorageFS.html">Server/PersistentStorageFS</a></li><li><a href="module-Storage_GenericStorage.html">Storage/GenericStorage</a></li><li><a href="module-UDBI_Core-UDBIDatabase.html">UDBIDatabase</a></li><li><a href="module-UDBI_Core-UDBITable.html">UDBITable</a></li><li><a href="module-UDBI_Core-UDBITableSchema.html">UDBITableSchema</a></li><li><a href="module-UDBI_EntityModel-UDBIEntityModel.html">UDBIEntityModel</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeBigInteger-FieldTypeBigInteger.html">FieldTypeBigInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeFloat-FieldTypeFloat.html">FieldTypeFloat</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeGeneric-FieldTypeGeneric.html">FieldTypeGeneric</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeInteger-FieldTypeInteger.html">FieldTypeInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeString-FieldTypeString.html">FieldTypeString</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeText-FieldTypeText.html">FieldTypeText</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp-FieldTypeTimestamp.html">FieldTypeTimestamp</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp-FieldTypeTimestampValueNow.html">FieldTypeTimestampValueNow</a></li><li><a href="module-UDBI_ManyToOne-ManyToOne.html">ManyToOne</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager.html">ObjectManager</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager_Flush.html">Flush</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager_Query.html">Query</a></li><li><a href="module-UDBI_ObjectManager-ObjectRepository.html">ObjectRepository</a></li><li><a href="module-UDBI_OneToOne-OneToOne.html">OneToOne</a></li><li><a href="module-UDBIAdapters_IDB-IDBDatabaseReference.html">IDBDatabaseReference</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManager.html">IDBObjectManager</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerCustomIndex.html">IDBObjectManagerCustomIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerGeneratedIndex.html">IDBObjectManagerGeneratedIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerIndex.html">IDBObjectManagerIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerIndexEntry.html">IDBObjectManagerIndexEntry</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerPrimaryKey.html">IDBObjectManagerPrimaryKey</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectQuery.html">IDBObjectQuery</a></li><li><a href="module-UDBIAdapters_IDB-IDBTable.html">IDBTable</a></li><li><a href="module-UDBIAdapters_IDB-IDBUDBIDatabase.html">IDBUDBIDatabase</a></li><li><a href="MySQLDatabase.html">MySQLDatabase</a></li><li><a href="MySQLDBConnectionDescriptor.html">MySQLDBConnectionDescriptor</a></li><li><a href="MySQLObjectManager.html">MySQLObjectManager</a></li><li><a href="MySQLSchemaBuilder.html">MySQLSchemaBuilder</a></li><li><a href="MySQLTable.html">MySQLTable</a></li><li><a href="PopupWindowController.html">PopupWindowController</a></li><li><a href="PropertyConstraint.html">PropertyConstraint</a></li><li><a href="PropertyConstraintAttached.html">PropertyConstraintAttached</a></li><li><a href="PropertyConstraintItemInList.html">PropertyConstraintItemInList</a></li><li><a href="PropertyEditor.html">PropertyEditor</a></li><li><a href="PropertyType.html">PropertyType</a></li><li><a href="PropertyTypeCollection.html">PropertyTypeCollection</a></li><li><a href="PropertyTypeObject.html">PropertyTypeObject</a></li><li><a href="SessionInterface.html">SessionInterface</a></li><li><a href="SyncAction.html">SyncAction</a></li><li><a href="SyncedEntityStorage.html">SyncedEntityStorage</a></li><li><a href="ViewWindowController.html">ViewWindowController</a></li><li><a href="WindowControllerInterface.html">WindowControllerInterface</a></li><li><a href="xDMS.UIX.Providers.assetManager.Resource.html">Resource</a></li></ul><h3>Interfaces</h3><ul><li><a href="SyncedPropertyTypeObjectInterface.html">SyncedPropertyTypeObjectInterface</a></li></ul><h3>Global</h3><ul><li><a href="global.html#FULL_TREE">FULL_TREE</a></li><li><a href="global.html#isObject">isObject</a></li><li><a href="global.html#rootEntityStorageCollection">rootEntityStorageCollection</a></li><li><a href="global.html#SPLIT_TREE">SPLIT_TREE</a></li><li><a href="global.html#ViewWindowsControllerDefaults">ViewWindowsControllerDefaults</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Jan 10 2021 14:05:14 GMT+0100 (Mitteleuropäische Normalzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

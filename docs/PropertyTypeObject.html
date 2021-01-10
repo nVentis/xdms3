@@ -1,0 +1,5175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: PropertyTypeObject</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: PropertyTypeObject</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>PropertyTypeObject<span class="signature">()</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Allows validating and comparing object by using serialization to strings</div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="PropertyTypeObject"><span class="type-signature"></span>new PropertyTypeObject<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line45">line 45</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="defaultValues"><span class="type-signature"></span>defaultValues<span class="type-signature"> :Object.&lt;string, any></span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object.&lt;string, any></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line59">line 59</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="definedProperties"><span class="type-signature"></span>definedProperties<span class="type-signature"> :Object.&lt;string, <a href="global.html#StaticPropertyTypeDefinition">StaticPropertyTypeDefinition</a>></span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object.&lt;string, <a href="global.html#StaticPropertyTypeDefinition">StaticPropertyTypeDefinition</a>></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line85">line 85</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="emptyValues"><span class="type-signature"></span>emptyValues<span class="type-signature"> :Object.&lt;string, (string|number)></span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object.&lt;string, (string|number)></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line64">line 64</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="entityStorage"><span class="type-signature"></span>entityStorage<span class="type-signature"> :<a href="EntityStorage.html">EntityStorage</a></span></h4>
+
+
+
+
+<div class="description">
+    Will be assigned when the first EntityStorage is created using this PropertyType
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="EntityStorage.html">EntityStorage</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line73">line 73</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="idProperty"><span class="type-signature"></span>idProperty<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line79">line 79</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="Properties"><span class="type-signature"></span>Properties<span class="type-signature"> :<a href="PropertyType.html">PropertyType</a>|string</span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="PropertyType.html">PropertyType</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line54">line 54</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".addConstraint"><span class="type-signature">(static) </span>addConstraint<span class="signature">(fieldName, someConstraint)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fieldName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>someConstraint</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="PropertyConstraint.html">PropertyConstraint</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line153">line 153</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".compile"><span class="type-signature">(static) </span>compile<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Sets up the relational mappings through object traversal
+Must be called before usage e.g. in EntityStorage
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line104">line 104</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".definedPropertiesWithoutId"><span class="type-signature">(static) </span>definedPropertiesWithoutId<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;string>}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line91">line 91</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;string></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".definedPropertyItems"><span class="type-signature">(static) </span>definedPropertyItems<span class="signature">()</span><span class="type-signature"> &rarr; {Object.&lt;string, (<a href="PropertyType.html">PropertyType</a>|string)>}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line318">line 318</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object.&lt;string, (<a href="PropertyType.html">PropertyType</a>|string)></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".definedPropertyNames"><span class="type-signature">(static) </span>definedPropertyNames<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;string>}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line310">line 310</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;string></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".getEmpty"><span class="type-signature">(static) </span>getEmpty<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns an entity representing an empty data structure
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line194">line 194</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".isEmpty"><span class="type-signature">(static) </span>isEmpty<span class="signature">(someObject)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    For deletion of objects, it is neccessary to define an "empty representation"
+Per default, we treat completely objects with completely zeroed properties as deleted
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>someObject</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line176">line 176</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".isNull"><span class="type-signature">(static) </span>isNull<span class="signature">(someObject)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Required for keeping Nullable properties consistent. Per default, a simple check is done
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>someObject</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line186">line 186</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".toThis"><span class="type-signature">(static) </span>toThis<span class="signature">(objectIn, additionalConstraints, verbose)</span><span class="type-signature"> &rarr; {null|object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Parses a given object according to the definitions supplied by PropertyType
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>objectIn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>additionalConstraints</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="PropertyConstraintAttached.html">PropertyConstraintAttached</a></span>
+|
+
+<span class="param-type">Array.&lt;<a href="PropertyConstraintAttached.html">PropertyConstraintAttached</a>></span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>verbose</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line210">line 210</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">null</span>
+|
+
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="createRawDefault"><span class="type-signature"></span>createRawDefault<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Clone an object matching this type using the default values
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line111">line 111</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="definedPropertyItems"><span class="type-signature"></span>definedPropertyItems<span class="signature">()</span><span class="type-signature"> &rarr; {Object.&lt;string, (<a href="PropertyType.html">PropertyType</a>|string)>}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line103">line 103</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object.&lt;string, (<a href="PropertyType.html">PropertyType</a>|string)></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="definedPropertyNames"><span class="type-signature"></span>definedPropertyNames<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;string>}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line96">line 96</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;string></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="defineProperty"><span class="type-signature"></span>defineProperty<span class="signature">(Name, propertyType, {string|number, emptyValue<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="PropertyTypeObject.html">PropertyTypeObject</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Registers a new property for this (otherwise) generic object
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>Name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>propertyType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="PropertyType.html">PropertyType</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>{string|number</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">[defaultValue]</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>emptyValue</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line74">line 74</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="PropertyTypeObject.html">PropertyTypeObject</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getEmpty"><span class="type-signature"></span>getEmpty<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns an entity representing an empty data structure
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line130">line 130</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="isEmpty"><span class="type-signature"></span>isEmpty<span class="signature">(someObject)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    For deletion of objects, it is neccessary to define an "empty representation"Per default, we treat completely objects with completely zeroed properties as deleted
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>someObject</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line122">line 122</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>PropertyTypeObject<span class="signature">()</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Allows defining data models and validating/comparing objects against them</div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="PropertyTypeObject"><span class="type-signature"></span>new PropertyTypeObject<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>definedProperties</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Obejct.&lt;string, <a href="global.html#StaticPropertyTypeDefinition">StaticPropertyTypeDefinition</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Use .compile()</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line68">line 68</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="defaultValues"><span class="type-signature"></span>defaultValues<span class="type-signature"> :Object.&lt;string, any></span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object.&lt;string, any></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line59">line 59</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="definedProperties"><span class="type-signature"></span>definedProperties<span class="type-signature"> :Object.&lt;string, <a href="global.html#StaticPropertyTypeDefinition">StaticPropertyTypeDefinition</a>></span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object.&lt;string, <a href="global.html#StaticPropertyTypeDefinition">StaticPropertyTypeDefinition</a>></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line85">line 85</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="emptyValues"><span class="type-signature"></span>emptyValues<span class="type-signature"> :Object.&lt;string, (string|number)></span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object.&lt;string, (string|number)></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line64">line 64</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="entityStorage"><span class="type-signature"></span>entityStorage<span class="type-signature"> :<a href="EntityStorage.html">EntityStorage</a></span></h4>
+
+
+
+
+<div class="description">
+    Will be assigned when the first EntityStorage is created using this PropertyType
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="EntityStorage.html">EntityStorage</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line73">line 73</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="idProperty"><span class="type-signature"></span>idProperty<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line79">line 79</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="Properties"><span class="type-signature"></span>Properties<span class="type-signature"> :<a href="PropertyType.html">PropertyType</a>|string</span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="PropertyType.html">PropertyType</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line54">line 54</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".addConstraint"><span class="type-signature">(static) </span>addConstraint<span class="signature">(fieldName, someConstraint)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fieldName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>someConstraint</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="PropertyConstraint.html">PropertyConstraint</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line153">line 153</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".compile"><span class="type-signature">(static) </span>compile<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Sets up the relational mappings through object traversal
+Must be called before usage e.g. in EntityStorage
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line104">line 104</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".definedPropertiesWithoutId"><span class="type-signature">(static) </span>definedPropertiesWithoutId<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;string>}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line91">line 91</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;string></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".definedPropertyItems"><span class="type-signature">(static) </span>definedPropertyItems<span class="signature">()</span><span class="type-signature"> &rarr; {Object.&lt;string, (<a href="PropertyType.html">PropertyType</a>|string)>}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line318">line 318</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object.&lt;string, (<a href="PropertyType.html">PropertyType</a>|string)></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".definedPropertyNames"><span class="type-signature">(static) </span>definedPropertyNames<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;string>}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line310">line 310</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;string></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".getEmpty"><span class="type-signature">(static) </span>getEmpty<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns an entity representing an empty data structure
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line194">line 194</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".isEmpty"><span class="type-signature">(static) </span>isEmpty<span class="signature">(someObject)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    For deletion of objects, it is neccessary to define an "empty representation"
+Per default, we treat completely objects with completely zeroed properties as deleted
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>someObject</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line176">line 176</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".isNull"><span class="type-signature">(static) </span>isNull<span class="signature">(someObject)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Required for keeping Nullable properties consistent. Per default, a simple check is done
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>someObject</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line186">line 186</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".toThis"><span class="type-signature">(static) </span>toThis<span class="signature">(objectIn, additionalConstraints, verbose)</span><span class="type-signature"> &rarr; {null|object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Parses a given object according to the definitions supplied by PropertyType
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>objectIn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>additionalConstraints</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="PropertyConstraintAttached.html">PropertyConstraintAttached</a></span>
+|
+
+<span class="param-type">Array.&lt;<a href="PropertyConstraintAttached.html">PropertyConstraintAttached</a>></span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>verbose</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyType.mjs.html">Client/PropertyEditor/PropertyType.mjs</a>, <a href="Client_PropertyEditor_PropertyType.mjs.html#line210">line 210</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">null</span>
+|
+
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="createRawDefault"><span class="type-signature"></span>createRawDefault<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Clone an object matching this type using the default values
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line111">line 111</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="definedPropertyItems"><span class="type-signature"></span>definedPropertyItems<span class="signature">()</span><span class="type-signature"> &rarr; {Object.&lt;string, (<a href="PropertyType.html">PropertyType</a>|string)>}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line103">line 103</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object.&lt;string, (<a href="PropertyType.html">PropertyType</a>|string)></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="definedPropertyNames"><span class="type-signature"></span>definedPropertyNames<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;string>}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line96">line 96</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;string></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="defineProperty"><span class="type-signature"></span>defineProperty<span class="signature">(Name, propertyType, {string|number, emptyValue<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="PropertyTypeObject.html">PropertyTypeObject</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Registers a new property for this (otherwise) generic object
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>Name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>propertyType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="PropertyType.html">PropertyType</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>{string|number</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">[defaultValue]</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>emptyValue</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line74">line 74</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="PropertyTypeObject.html">PropertyTypeObject</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getEmpty"><span class="type-signature"></span>getEmpty<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns an entity representing an empty data structure
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line130">line 130</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="isEmpty"><span class="type-signature"></span>isEmpty<span class="signature">(someObject)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    For deletion of objects, it is neccessary to define an "empty representation"Per default, we treat completely objects with completely zeroed properties as deleted
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>someObject</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Client_PropertyEditor_PropertyEditor.mjs.html">Client/PropertyEditor/PropertyEditor.mjs</a>, <a href="Client_PropertyEditor_PropertyEditor.mjs.html#line122">line 122</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="Client_StoreReducable%250ASee%2520classmodule_.html">Client/StoreReducable
+See class</a></li><li><a href="Client_UI_AssetManager%250ASee%2520classmodule_.html">Client/UI/AssetManager
+See class</a></li><li><a href="Client_UI_AssetType%250DSee%2520classmodule_.html">Client/UI/AssetTypeSee class</a></li><li><a href="Entities_Config_ConfigSet%250DSee%2520class%2520descriptionmodule_.html">Entities/Config/ConfigSetSee class description</a></li><li><a href="module-Client_ComponentConnectorInterface.html">Client/ComponentConnectorInterface</a></li><li><a href="module-Client_ComponentConnectorReducable.html">Client/ComponentConnectorReducable</a></li><li><a href="module-Client_Store.html">Client/Store</a></li><li><a href="module-Client_UI_Components_EntityListInterface.html">Client/UI/Components/EntityListInterface</a></li><li><a href="module-Client_UI_Components_PropertyToggleInterface.html">Client/UI/Components/PropertyToggleInterface</a></li><li><a href="module-Client_UI_ReactableDOMInterface.html">Client/UI/ReactableDOMInterface</a></li><li><a href="module-Client_UI_ReactableInterface.html">Client/UI/ReactableInterface</a></li><li><a href="module-Client_UI_UIXAlert.html">Client/UI/UIXAlert</a></li><li><a href="module-Client_UI_UIXElement.html">Client/UI/UIXElement</a></li><li><a href="module-Client_UI_UIXGenericContainer.html">Client/UI/UIXGenericContainer</a></li><li><a href="module-Client_UI_UIXTemplate.html">Client/UI/UIXTemplate</a></li><li><a href="module-Client_UI_ViewComponent.html">Client/UI/ViewComponent</a></li><li><a href="module-Client_UI_ViewFragment.html">Client/UI/ViewFragment</a></li><li><a href="module-Client_UI_xInteraction.html">Client/UI/xInteraction</a></li><li><a href="module-Communication_CommunicationDataRequest.html">Communication/CommunicationDataRequest</a></li><li><a href="module-Core_IDGenerator.html">Core/IDGenerator</a></li><li><a href="module-Core_IDGeneratorNumeric.html">Core/IDGeneratorNumeric</a></li><li><a href="module-Core_ProtectedNamespace.html">Core/ProtectedNamespace</a></li><li><a href="module-Core_UniqueNamespace.html">Core/UniqueNamespace</a></li><li><a href="module-Entities_Client_PersistentStorage.html">Entities/Client/PersistentStorage</a></li><li><a href="module-Entities_Communication_CommunicationSocket.html">Entities/Communication/CommunicationSocket</a></li><li><a href="module-Entities_Communication_DataEndpointInterface.html">Entities/Communication/DataEndpointInterface</a></li><li><a href="module-Entities_Communication_DataEndpointInterfaceRW.html">Entities/Communication/DataEndpointInterfaceRW</a></li><li><a href="module-Entities_Core_FlectionProvider.html">Entities/Core/FlectionProvider</a></li><li><a href="module-Entities_Event_Namespace.html">Entities/Event/Namespace</a></li><li><a href="module-Exceptions_AccessDeniedException.html">Exceptions/AccessDeniedException</a></li><li><a href="module-Exceptions_GenericException.html">Exceptions/GenericException</a></li><li><a href="module-Exceptions_InvalidEntityException.html">Exceptions/InvalidEntityException</a></li><li><a href="module-Exceptions_InvalidStateException.html">Exceptions/InvalidStateException</a></li><li><a href="module-Exceptions_InvalidTypeException.html">Exceptions/InvalidTypeException</a></li><li><a href="module-Exceptions_NotFoundException.html">Exceptions/NotFoundException</a></li><li><a href="module-Exceptions_NotImplementedException.html">Exceptions/NotImplementedException</a></li><li><a href="module-Exceptions_RequestTimeoutException.html">Exceptions/RequestTimeoutException</a></li><li><a href="module-Exceptions_UnexpectedIdentifierException.html">Exceptions/UnexpectedIdentifierException</a></li><li><a href="module-Exceptions_UniquenessViolationException.html">Exceptions/UniquenessViolationException</a></li><li><a href="module-ObjectList.html">ObjectList</a></li><li><a href="module-Server_ConnectionProvider.html">Server/ConnectionProvider</a></li><li><a href="module-Server_ConnectionProviderSIO.html">Server/ConnectionProviderSIO</a></li><li><a href="module-Server_ConnectionProviderTLS.html">Server/ConnectionProviderTLS</a></li><li><a href="module-Server_IDGeneratorUUIDv4.html">Server/IDGeneratorUUIDv4</a></li><li><a href="module-Server_PersistentStorageFS.html">Server/PersistentStorageFS</a></li><li><a href="module-Storage_GenericStorage.html">Storage/GenericStorage</a></li><li><a href="module-UDBI_Core.html">UDBI/Core</a></li><li><a href="module-UDBI_EntityModel.html">UDBI/EntityModel</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeBigInteger.html">UDBI/FieldTypes/FieldTypeBigInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeFloat.html">UDBI/FieldTypes/FieldTypeFloat</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeGeneric.html">UDBI/FieldTypes/FieldTypeGeneric</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeInteger.html">UDBI/FieldTypes/FieldTypeInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeString.html">UDBI/FieldTypes/FieldTypeString</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeText.html">UDBI/FieldTypes/FieldTypeText</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp.html">UDBI/FieldTypes/FieldTypeTimestamp</a></li><li><a href="module-UDBI_ManyToOne.html">UDBI/ManyToOne</a></li><li><a href="module-UDBI_ObjectManager.html">UDBI/ObjectManager</a></li><li><a href="module-UDBI_OneToOne.html">UDBI/OneToOne</a></li><li><a href="module-UDBIAdapters_IDB.html">UDBIAdapters/IDB</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-This.html#.Request">Request</a></li><li><a href="-_anonymous_-This.Start.html">Start</a></li><li><a href="-_anonymous_-This.html#.Use">Use</a></li><li><a href="Client_StoreReducable%250ASee%2520classmodule_-PrefixedReducerManager.html">PrefixedReducerManager</a></li><li><a href="Client_StoreReducable%250ASee%2520classmodule_-StoreReducable.html">StoreReducable</a></li><li><a href="Client_UI_AssetManager%250ASee%2520classmodule_-AssetManager.html">AssetManager</a></li><li><a href="Client_UI_AssetType%250DSee%2520classmodule_-AssetType.html">AssetType</a></li><li><a href="CollectionEditor.html">CollectionEditor</a></li><li><a href="CookieStorage.html">CookieStorage</a></li><li><a href="Entities_Config_ConfigSet%250DSee%2520class%2520descriptionmodule_-ConfigSet.html">ConfigSet</a></li><li><a href="EntityDiffRequest.html">EntityDiffRequest</a></li><li><a href="EntityStorage.html">EntityStorage</a></li><li><a href="IllegalParallelEditException.html">IllegalParallelEditException</a></li><li><a href="LoginRequestInterface.html">LoginRequestInterface</a></li><li><a href="module.exports.html">exports</a></li><li><a href="module-Client_ComponentConnectorInterface-ComponentConnectorInterface.html">ComponentConnectorInterface</a></li><li><a href="module-Client_ComponentConnectorReducable-ComponentConnectorReducable.html">ComponentConnectorReducable</a></li><li><a href="module-Client_Store-PatchedStoreUpdate.html">PatchedStoreUpdate</a></li><li><a href="module-Client_Store-Store.html">Store</a></li><li><a href="module-Client_UI_UIXAlert-UIXAlert.html">UIXAlert</a></li><li><a href="module-Client_UI_UIXElement-UIXElement.html">UIXElement</a></li><li><a href="module-Client_UI_UIXGenericContainer-UIXGenericContainer.html">UIXGenericContainer</a></li><li><a href="module-Client_UI_UIXTemplate-UIXTemplate.html">UIXTemplate</a></li><li><a href="module-Client_UI_ViewComponent-ViewComponent.html">ViewComponent</a></li><li><a href="module-Client_UI_xInteraction-xInteraction.html">xInteraction</a></li><li><a href="module-Communication_CommunicationDataRequest-CommunicationDataRequest.html">CommunicationDataRequest</a></li><li><a href="module-Core_IDGeneratorNumeric-IDGeneratorNumeric.html">IDGeneratorNumeric</a></li><li><a href="module-Core_IDGenerator-IDGenerator.html">IDGenerator</a></li><li><a href="module-Core_UniqueNamespace-UniqueNamespace.html">UniqueNamespace</a></li><li><a href="module-Entities_Client_PersistentStorage.html">Entities/Client/PersistentStorage</a></li><li><a href="module-Entities_Communication_CommunicationSocket-CommunicationSocket.html">CommunicationSocket</a></li><li><a href="module-Entities_Communication_DataEndpointInterfaceRW-DataEndpointInterfaceRW.html">DataEndpointInterfaceRW</a></li><li><a href="module-Entities_Communication_DataEndpointInterface-DataEndpointInterface.html">DataEndpointInterface</a></li><li><a href="module-Entities_Event_Namespace-EventListenerEntry.html">EventListenerEntry</a></li><li><a href="module-Entities_Event_Namespace-EventNamespace_ListenerEntry.html">ListenerEntry</a></li><li><a href="module-Entities_Event_Namespace-EventNamespace_Register.html">Register</a></li><li><a href="module-Exceptions_AccessDeniedException.html">Exceptions/AccessDeniedException</a></li><li><a href="module-Exceptions_GenericException.html">Exceptions/GenericException</a></li><li><a href="module-Exceptions_InvalidEntityException.html">Exceptions/InvalidEntityException</a></li><li><a href="module-Exceptions_InvalidStateException.html">Exceptions/InvalidStateException</a></li><li><a href="module-Exceptions_InvalidTypeException.html">Exceptions/InvalidTypeException</a></li><li><a href="module-Exceptions_NotFoundException.html">Exceptions/NotFoundException</a></li><li><a href="module-Exceptions_NotImplementedException.html">Exceptions/NotImplementedException</a></li><li><a href="module-Exceptions_RequestTimeoutException.html">Exceptions/RequestTimeoutException</a></li><li><a href="module-Exceptions_UnexpectedIdentifierException.html">Exceptions/UnexpectedIdentifierException</a></li><li><a href="module-Exceptions_UniquenessViolationException.html">Exceptions/UniquenessViolationException</a></li><li><a href="module-ObjectList-ObjectList.html">ObjectList</a></li><li><a href="module-Server_ConnectionProviderTLS-ConnectionProviderTLS.html">ConnectionProviderTLS</a></li><li><a href="module-Server_ConnectionProvider-ConnectionProvider.html">ConnectionProvider</a></li><li><a href="module-Server_IDGeneratorUUIDv4-IDGeneratorUUIDv4.html">IDGeneratorUUIDv4</a></li><li><a href="module-Server_PersistentStorageFS.html">Server/PersistentStorageFS</a></li><li><a href="module-Storage_GenericStorage.html">Storage/GenericStorage</a></li><li><a href="module-UDBI_Core-UDBIDatabase.html">UDBIDatabase</a></li><li><a href="module-UDBI_Core-UDBITable.html">UDBITable</a></li><li><a href="module-UDBI_Core-UDBITableSchema.html">UDBITableSchema</a></li><li><a href="module-UDBI_EntityModel-UDBIEntityModel.html">UDBIEntityModel</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeBigInteger-FieldTypeBigInteger.html">FieldTypeBigInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeFloat-FieldTypeFloat.html">FieldTypeFloat</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeGeneric-FieldTypeGeneric.html">FieldTypeGeneric</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeInteger-FieldTypeInteger.html">FieldTypeInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeString-FieldTypeString.html">FieldTypeString</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeText-FieldTypeText.html">FieldTypeText</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp-FieldTypeTimestamp.html">FieldTypeTimestamp</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp-FieldTypeTimestampValueNow.html">FieldTypeTimestampValueNow</a></li><li><a href="module-UDBI_ManyToOne-ManyToOne.html">ManyToOne</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager.html">ObjectManager</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager_Flush.html">Flush</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager_Query.html">Query</a></li><li><a href="module-UDBI_ObjectManager-ObjectRepository.html">ObjectRepository</a></li><li><a href="module-UDBI_OneToOne-OneToOne.html">OneToOne</a></li><li><a href="module-UDBIAdapters_IDB-IDBDatabaseReference.html">IDBDatabaseReference</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManager.html">IDBObjectManager</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerCustomIndex.html">IDBObjectManagerCustomIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerGeneratedIndex.html">IDBObjectManagerGeneratedIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerIndex.html">IDBObjectManagerIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerIndexEntry.html">IDBObjectManagerIndexEntry</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerPrimaryKey.html">IDBObjectManagerPrimaryKey</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectQuery.html">IDBObjectQuery</a></li><li><a href="module-UDBIAdapters_IDB-IDBTable.html">IDBTable</a></li><li><a href="module-UDBIAdapters_IDB-IDBUDBIDatabase.html">IDBUDBIDatabase</a></li><li><a href="MySQLDatabase.html">MySQLDatabase</a></li><li><a href="MySQLDBConnectionDescriptor.html">MySQLDBConnectionDescriptor</a></li><li><a href="MySQLObjectManager.html">MySQLObjectManager</a></li><li><a href="MySQLSchemaBuilder.html">MySQLSchemaBuilder</a></li><li><a href="MySQLTable.html">MySQLTable</a></li><li><a href="PopupWindowController.html">PopupWindowController</a></li><li><a href="PropertyConstraint.html">PropertyConstraint</a></li><li><a href="PropertyConstraintAttached.html">PropertyConstraintAttached</a></li><li><a href="PropertyConstraintItemInList.html">PropertyConstraintItemInList</a></li><li><a href="PropertyEditor.html">PropertyEditor</a></li><li><a href="PropertyType.html">PropertyType</a></li><li><a href="PropertyTypeCollection.html">PropertyTypeCollection</a></li><li><a href="PropertyTypeObject.html">PropertyTypeObject</a></li><li><a href="SessionInterface.html">SessionInterface</a></li><li><a href="SyncAction.html">SyncAction</a></li><li><a href="SyncedEntityStorage.html">SyncedEntityStorage</a></li><li><a href="ViewWindowController.html">ViewWindowController</a></li><li><a href="WindowControllerInterface.html">WindowControllerInterface</a></li><li><a href="xDMS.UIX.Providers.assetManager.Resource.html">Resource</a></li></ul><h3>Interfaces</h3><ul><li><a href="SyncedPropertyTypeObjectInterface.html">SyncedPropertyTypeObjectInterface</a></li></ul><h3>Global</h3><ul><li><a href="global.html#FULL_TREE">FULL_TREE</a></li><li><a href="global.html#isObject">isObject</a></li><li><a href="global.html#rootEntityStorageCollection">rootEntityStorageCollection</a></li><li><a href="global.html#SPLIT_TREE">SPLIT_TREE</a></li><li><a href="global.html#ViewWindowsControllerDefaults">ViewWindowsControllerDefaults</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Jan 10 2021 14:05:14 GMT+0100 (Mitteleuropäische Normalzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

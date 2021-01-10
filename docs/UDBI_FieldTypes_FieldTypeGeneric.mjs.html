@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: UDBI/FieldTypes/FieldTypeGeneric.mjs</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: UDBI/FieldTypes/FieldTypeGeneric.mjs</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * See class
+ * @module UDBI/FieldTypes/FieldTypeGeneric
+ */
+
+let FieldTypeIDs = {
+	String: "STRING",
+	Integer: "INT",
+	Text: "TEXT",
+	BigInteger: "BIGINT",
+	Float: "FLOAT",
+	Timestamp: "TIMESTAMP"
+}
+
+export const FIELD_ON_DELETE = {
+	CASCADE: "CASCADE"
+}
+
+export const FIELD_ON_UPDATE = {
+	CASCADE: "CASCADE"
+}
+
+/**
+ * @typedef {object} FieldTypeOptions
+ * @property {boolean} [PK]
+ * @property {boolean} [Nullable=true]
+ * @property {*} [Default]
+ * @property {string} [refColumn]
+ * @property {string} [refTable]
+ * @property {boolean} [isIndex=false]
+ * @property {boolean} [isUnique=false]
+ * @property {boolean} [Unsigned=false]
+ * @property {string} [onDelete] - See possible values in FIELD_ON_DELETE
+ * @property {string} [onUpdate] - See possible values in FIELD_ON_UPDATE
+ */
+
+/**
+ * Used for defining table schemas
+ * @class
+ */
+class FieldTypeGeneric {
+	/**
+	 *
+	 * @param {string} Name
+	 * @param {string} Type
+	 * @param {FieldTypeOptions} [Options]
+	 */
+	constructor(
+		Name,
+		Type,
+		Options
+	) {
+		if (!Options)
+			Options = {}
+
+		if (typeof Options.Nullable === "undefined")
+			Options.Nullable = true;
+
+		this.Name = Name;
+		this.Type = Type;
+
+		this.PK = !!Options.PK;
+		this.Nullable = !!Options.Nullable;
+		this.Default = Options.Default;
+
+		this.refColumn = Options.refColumn;
+		this.refTable = Options.refTable;
+		this.isIndex = !!Options.isIndex;
+		this.isUnique = !!Options.isUnique;
+
+		this.Unsigned = !!Options.Unsigned;
+
+		this.onDelete = (typeof Options.onDelete === "string") ? Options.onDelete : "";
+		this.onUpdate = (typeof Options.onUpdate === "string") ? Options.onUpdate : "";
+	}
+}
+
+export default FieldTypeGeneric;
+export {
+	FieldTypeIDs
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="Client_StoreReducable%250ASee%2520classmodule_.html">Client/StoreReducable
+See class</a></li><li><a href="Client_UI_AssetManager%250ASee%2520classmodule_.html">Client/UI/AssetManager
+See class</a></li><li><a href="Client_UI_AssetType%250DSee%2520classmodule_.html">Client/UI/AssetTypeSee class</a></li><li><a href="Entities_Config_ConfigSet%250DSee%2520class%2520descriptionmodule_.html">Entities/Config/ConfigSetSee class description</a></li><li><a href="module-Client_ComponentConnectorInterface.html">Client/ComponentConnectorInterface</a></li><li><a href="module-Client_ComponentConnectorReducable.html">Client/ComponentConnectorReducable</a></li><li><a href="module-Client_Store.html">Client/Store</a></li><li><a href="module-Client_UI_Components_EntityListInterface.html">Client/UI/Components/EntityListInterface</a></li><li><a href="module-Client_UI_Components_PropertyToggleInterface.html">Client/UI/Components/PropertyToggleInterface</a></li><li><a href="module-Client_UI_ReactableDOMInterface.html">Client/UI/ReactableDOMInterface</a></li><li><a href="module-Client_UI_ReactableInterface.html">Client/UI/ReactableInterface</a></li><li><a href="module-Client_UI_UIXAlert.html">Client/UI/UIXAlert</a></li><li><a href="module-Client_UI_UIXElement.html">Client/UI/UIXElement</a></li><li><a href="module-Client_UI_UIXGenericContainer.html">Client/UI/UIXGenericContainer</a></li><li><a href="module-Client_UI_UIXTemplate.html">Client/UI/UIXTemplate</a></li><li><a href="module-Client_UI_ViewComponent.html">Client/UI/ViewComponent</a></li><li><a href="module-Client_UI_ViewFragment.html">Client/UI/ViewFragment</a></li><li><a href="module-Client_UI_xInteraction.html">Client/UI/xInteraction</a></li><li><a href="module-Communication_CommunicationDataRequest.html">Communication/CommunicationDataRequest</a></li><li><a href="module-Core_IDGenerator.html">Core/IDGenerator</a></li><li><a href="module-Core_IDGeneratorNumeric.html">Core/IDGeneratorNumeric</a></li><li><a href="module-Core_ProtectedNamespace.html">Core/ProtectedNamespace</a></li><li><a href="module-Core_UniqueNamespace.html">Core/UniqueNamespace</a></li><li><a href="module-Entities_Client_PersistentStorage.html">Entities/Client/PersistentStorage</a></li><li><a href="module-Entities_Communication_CommunicationSocket.html">Entities/Communication/CommunicationSocket</a></li><li><a href="module-Entities_Communication_DataEndpointInterface.html">Entities/Communication/DataEndpointInterface</a></li><li><a href="module-Entities_Communication_DataEndpointInterfaceRW.html">Entities/Communication/DataEndpointInterfaceRW</a></li><li><a href="module-Entities_Core_FlectionProvider.html">Entities/Core/FlectionProvider</a></li><li><a href="module-Entities_Event_Namespace.html">Entities/Event/Namespace</a></li><li><a href="module-Exceptions_AccessDeniedException.html">Exceptions/AccessDeniedException</a></li><li><a href="module-Exceptions_GenericException.html">Exceptions/GenericException</a></li><li><a href="module-Exceptions_InvalidEntityException.html">Exceptions/InvalidEntityException</a></li><li><a href="module-Exceptions_InvalidStateException.html">Exceptions/InvalidStateException</a></li><li><a href="module-Exceptions_InvalidTypeException.html">Exceptions/InvalidTypeException</a></li><li><a href="module-Exceptions_NotFoundException.html">Exceptions/NotFoundException</a></li><li><a href="module-Exceptions_NotImplementedException.html">Exceptions/NotImplementedException</a></li><li><a href="module-Exceptions_RequestTimeoutException.html">Exceptions/RequestTimeoutException</a></li><li><a href="module-Exceptions_UnexpectedIdentifierException.html">Exceptions/UnexpectedIdentifierException</a></li><li><a href="module-Exceptions_UniquenessViolationException.html">Exceptions/UniquenessViolationException</a></li><li><a href="module-ObjectList.html">ObjectList</a></li><li><a href="module-Server_ConnectionProvider.html">Server/ConnectionProvider</a></li><li><a href="module-Server_ConnectionProviderSIO.html">Server/ConnectionProviderSIO</a></li><li><a href="module-Server_ConnectionProviderTLS.html">Server/ConnectionProviderTLS</a></li><li><a href="module-Server_IDGeneratorUUIDv4.html">Server/IDGeneratorUUIDv4</a></li><li><a href="module-Server_PersistentStorageFS.html">Server/PersistentStorageFS</a></li><li><a href="module-Storage_GenericStorage.html">Storage/GenericStorage</a></li><li><a href="module-UDBI_Core.html">UDBI/Core</a></li><li><a href="module-UDBI_EntityModel.html">UDBI/EntityModel</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeBigInteger.html">UDBI/FieldTypes/FieldTypeBigInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeFloat.html">UDBI/FieldTypes/FieldTypeFloat</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeGeneric.html">UDBI/FieldTypes/FieldTypeGeneric</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeInteger.html">UDBI/FieldTypes/FieldTypeInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeString.html">UDBI/FieldTypes/FieldTypeString</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeText.html">UDBI/FieldTypes/FieldTypeText</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp.html">UDBI/FieldTypes/FieldTypeTimestamp</a></li><li><a href="module-UDBI_ManyToOne.html">UDBI/ManyToOne</a></li><li><a href="module-UDBI_ObjectManager.html">UDBI/ObjectManager</a></li><li><a href="module-UDBI_OneToOne.html">UDBI/OneToOne</a></li><li><a href="module-UDBIAdapters_IDB.html">UDBIAdapters/IDB</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-This.html#.Request">Request</a></li><li><a href="-_anonymous_-This.Start.html">Start</a></li><li><a href="-_anonymous_-This.html#.Use">Use</a></li><li><a href="Client_StoreReducable%250ASee%2520classmodule_-PrefixedReducerManager.html">PrefixedReducerManager</a></li><li><a href="Client_StoreReducable%250ASee%2520classmodule_-StoreReducable.html">StoreReducable</a></li><li><a href="Client_UI_AssetManager%250ASee%2520classmodule_-AssetManager.html">AssetManager</a></li><li><a href="Client_UI_AssetType%250DSee%2520classmodule_-AssetType.html">AssetType</a></li><li><a href="CollectionEditor.html">CollectionEditor</a></li><li><a href="CookieStorage.html">CookieStorage</a></li><li><a href="Entities_Config_ConfigSet%250DSee%2520class%2520descriptionmodule_-ConfigSet.html">ConfigSet</a></li><li><a href="EntityDiffRequest.html">EntityDiffRequest</a></li><li><a href="EntityStorage.html">EntityStorage</a></li><li><a href="IllegalParallelEditException.html">IllegalParallelEditException</a></li><li><a href="LoginRequestInterface.html">LoginRequestInterface</a></li><li><a href="module.exports.html">exports</a></li><li><a href="module-Client_ComponentConnectorInterface-ComponentConnectorInterface.html">ComponentConnectorInterface</a></li><li><a href="module-Client_ComponentConnectorReducable-ComponentConnectorReducable.html">ComponentConnectorReducable</a></li><li><a href="module-Client_Store-PatchedStoreUpdate.html">PatchedStoreUpdate</a></li><li><a href="module-Client_Store-Store.html">Store</a></li><li><a href="module-Client_UI_UIXAlert-UIXAlert.html">UIXAlert</a></li><li><a href="module-Client_UI_UIXElement-UIXElement.html">UIXElement</a></li><li><a href="module-Client_UI_UIXGenericContainer-UIXGenericContainer.html">UIXGenericContainer</a></li><li><a href="module-Client_UI_UIXTemplate-UIXTemplate.html">UIXTemplate</a></li><li><a href="module-Client_UI_ViewComponent-ViewComponent.html">ViewComponent</a></li><li><a href="module-Client_UI_xInteraction-xInteraction.html">xInteraction</a></li><li><a href="module-Communication_CommunicationDataRequest-CommunicationDataRequest.html">CommunicationDataRequest</a></li><li><a href="module-Core_IDGeneratorNumeric-IDGeneratorNumeric.html">IDGeneratorNumeric</a></li><li><a href="module-Core_IDGenerator-IDGenerator.html">IDGenerator</a></li><li><a href="module-Core_UniqueNamespace-UniqueNamespace.html">UniqueNamespace</a></li><li><a href="module-Entities_Client_PersistentStorage.html">Entities/Client/PersistentStorage</a></li><li><a href="module-Entities_Communication_CommunicationSocket-CommunicationSocket.html">CommunicationSocket</a></li><li><a href="module-Entities_Communication_DataEndpointInterfaceRW-DataEndpointInterfaceRW.html">DataEndpointInterfaceRW</a></li><li><a href="module-Entities_Communication_DataEndpointInterface-DataEndpointInterface.html">DataEndpointInterface</a></li><li><a href="module-Entities_Event_Namespace-EventListenerEntry.html">EventListenerEntry</a></li><li><a href="module-Entities_Event_Namespace-EventNamespace_ListenerEntry.html">ListenerEntry</a></li><li><a href="module-Entities_Event_Namespace-EventNamespace_Register.html">Register</a></li><li><a href="module-Exceptions_AccessDeniedException.html">Exceptions/AccessDeniedException</a></li><li><a href="module-Exceptions_GenericException.html">Exceptions/GenericException</a></li><li><a href="module-Exceptions_InvalidEntityException.html">Exceptions/InvalidEntityException</a></li><li><a href="module-Exceptions_InvalidStateException.html">Exceptions/InvalidStateException</a></li><li><a href="module-Exceptions_InvalidTypeException.html">Exceptions/InvalidTypeException</a></li><li><a href="module-Exceptions_NotFoundException.html">Exceptions/NotFoundException</a></li><li><a href="module-Exceptions_NotImplementedException.html">Exceptions/NotImplementedException</a></li><li><a href="module-Exceptions_RequestTimeoutException.html">Exceptions/RequestTimeoutException</a></li><li><a href="module-Exceptions_UnexpectedIdentifierException.html">Exceptions/UnexpectedIdentifierException</a></li><li><a href="module-Exceptions_UniquenessViolationException.html">Exceptions/UniquenessViolationException</a></li><li><a href="module-ObjectList-ObjectList.html">ObjectList</a></li><li><a href="module-Server_ConnectionProviderTLS-ConnectionProviderTLS.html">ConnectionProviderTLS</a></li><li><a href="module-Server_ConnectionProvider-ConnectionProvider.html">ConnectionProvider</a></li><li><a href="module-Server_IDGeneratorUUIDv4-IDGeneratorUUIDv4.html">IDGeneratorUUIDv4</a></li><li><a href="module-Server_PersistentStorageFS.html">Server/PersistentStorageFS</a></li><li><a href="module-Storage_GenericStorage.html">Storage/GenericStorage</a></li><li><a href="module-UDBI_Core-UDBIDatabase.html">UDBIDatabase</a></li><li><a href="module-UDBI_Core-UDBITable.html">UDBITable</a></li><li><a href="module-UDBI_Core-UDBITableSchema.html">UDBITableSchema</a></li><li><a href="module-UDBI_EntityModel-UDBIEntityModel.html">UDBIEntityModel</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeBigInteger-FieldTypeBigInteger.html">FieldTypeBigInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeFloat-FieldTypeFloat.html">FieldTypeFloat</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeGeneric-FieldTypeGeneric.html">FieldTypeGeneric</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeInteger-FieldTypeInteger.html">FieldTypeInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeString-FieldTypeString.html">FieldTypeString</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeText-FieldTypeText.html">FieldTypeText</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp-FieldTypeTimestamp.html">FieldTypeTimestamp</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp-FieldTypeTimestampValueNow.html">FieldTypeTimestampValueNow</a></li><li><a href="module-UDBI_ManyToOne-ManyToOne.html">ManyToOne</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager.html">ObjectManager</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager_Flush.html">Flush</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager_Query.html">Query</a></li><li><a href="module-UDBI_ObjectManager-ObjectRepository.html">ObjectRepository</a></li><li><a href="module-UDBI_OneToOne-OneToOne.html">OneToOne</a></li><li><a href="module-UDBIAdapters_IDB-IDBDatabaseReference.html">IDBDatabaseReference</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManager.html">IDBObjectManager</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerCustomIndex.html">IDBObjectManagerCustomIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerGeneratedIndex.html">IDBObjectManagerGeneratedIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerIndex.html">IDBObjectManagerIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerIndexEntry.html">IDBObjectManagerIndexEntry</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerPrimaryKey.html">IDBObjectManagerPrimaryKey</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectQuery.html">IDBObjectQuery</a></li><li><a href="module-UDBIAdapters_IDB-IDBTable.html">IDBTable</a></li><li><a href="module-UDBIAdapters_IDB-IDBUDBIDatabase.html">IDBUDBIDatabase</a></li><li><a href="MySQLDatabase.html">MySQLDatabase</a></li><li><a href="MySQLDBConnectionDescriptor.html">MySQLDBConnectionDescriptor</a></li><li><a href="MySQLObjectManager.html">MySQLObjectManager</a></li><li><a href="MySQLSchemaBuilder.html">MySQLSchemaBuilder</a></li><li><a href="MySQLTable.html">MySQLTable</a></li><li><a href="PopupWindowController.html">PopupWindowController</a></li><li><a href="PropertyConstraint.html">PropertyConstraint</a></li><li><a href="PropertyConstraintAttached.html">PropertyConstraintAttached</a></li><li><a href="PropertyConstraintItemInList.html">PropertyConstraintItemInList</a></li><li><a href="PropertyEditor.html">PropertyEditor</a></li><li><a href="PropertyType.html">PropertyType</a></li><li><a href="PropertyTypeCollection.html">PropertyTypeCollection</a></li><li><a href="PropertyTypeObject.html">PropertyTypeObject</a></li><li><a href="SessionInterface.html">SessionInterface</a></li><li><a href="SyncAction.html">SyncAction</a></li><li><a href="SyncedEntityStorage.html">SyncedEntityStorage</a></li><li><a href="ViewWindowController.html">ViewWindowController</a></li><li><a href="WindowControllerInterface.html">WindowControllerInterface</a></li><li><a href="xDMS.UIX.Providers.assetManager.Resource.html">Resource</a></li></ul><h3>Interfaces</h3><ul><li><a href="SyncedPropertyTypeObjectInterface.html">SyncedPropertyTypeObjectInterface</a></li></ul><h3>Global</h3><ul><li><a href="global.html#FULL_TREE">FULL_TREE</a></li><li><a href="global.html#isObject">isObject</a></li><li><a href="global.html#rootEntityStorageCollection">rootEntityStorageCollection</a></li><li><a href="global.html#SPLIT_TREE">SPLIT_TREE</a></li><li><a href="global.html#ViewWindowsControllerDefaults">ViewWindowsControllerDefaults</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Jan 10 2021 14:05:14 GMT+0100 (Mitteleuropäische Normalzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

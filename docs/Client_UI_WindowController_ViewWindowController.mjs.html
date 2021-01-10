@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Client/UI/WindowController/ViewWindowController.mjs</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Client/UI/WindowController/ViewWindowController.mjs</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import WindowControllerInterface from "./WindowControllerInterface.mjs";
+import InvalidStateException from "../../../Exceptions/InvalidStateException.mjs";
+
+/**
+ * @typedef {object} ViewWindowOptions
+ * @property {HTMLElement} Container
+ * @property {string} Theme
+ * @property {boolean} controlToggle
+ * @property {boolean} controlMin
+ * @property {boolean} controlClose
+ * @property {boolean} statusBar
+ * @property {boolean} Resizable
+ * @property {boolean} Draggable
+ * @property {string|HTMLElement} Content
+ * @property {boolean} useFullSize
+ * @property {number} transitionDuration
+ * @property {string} easingFunction
+ * @property {string[]} windowClasses
+ * @property {string[]} contentClasses
+ * @property {object&lt;string, string|number>} windowStyles
+ * @property {object&lt;string, string|number>} contentStyles
+ * @property {string} [URL] - If an URL is supplied, Content will be overwritten to an iframe pointing to the desired location
+ */
+
+/**
+ * @type {ViewWindowOptions}
+ * */
+let ViewWindowsControllerDefaults = {
+	Container: document.body,
+	Theme: "Infinity",
+	controlToggle: false,
+	controlMin: false,
+	controlClose: true,
+	statusBar: true,
+	Resizable: false,
+	Draggable: true,
+	Content: "",
+	useFullSize: false,
+	transitionDuration: 250,
+	easingFunction: "easeOutExpo",
+	resizeContentElement: true,
+	windowClasses: [],
+	contentClasses: [],
+	windowStyles: {
+		width: "512px",
+		height: "192px"
+	},
+	contentStyles: {},
+}
+
+class ViewWindowController extends WindowControllerInterface {
+	/**
+	 * Set after first call to getWindow()
+	 * @type {HTMLElement}
+	 */
+	windowElement = null;
+
+	/**
+	 *
+	 * @type {boolean}
+	 */
+	windowMounted = false;
+
+	/**
+	 *
+	 * @param {string} windowName
+	 * @param {ViewWindowOptions} windowOptions
+	 */
+	constructor(
+		windowName,
+		windowOptions = {}
+	) {
+		super(windowName);
+
+		/**
+		 * @type {ViewWindowOptions}
+		 */
+		this.windowOptions = Object.assign({}, ViewWindowsControllerDefaults, windowOptions);
+
+		this.windowOptions.windowClasses = ViewWindowsControllerDefaults.windowClasses.concat(windowOptions.windowClasses || []);
+		this.windowOptions.contentClasses = ViewWindowsControllerDefaults.contentClasses.concat(windowOptions.contentClasses || []);
+
+		this.windowOptions.windowStyles = Object.assign({}, ViewWindowsControllerDefaults.windowStyles, windowOptions.windowStyles || {});
+		this.windowOptions.contentStyles = Object.assign({}, ViewWindowsControllerDefaults.contentStyles, windowOptions.contentStyles || {});
+
+		if (this.windowOptions.URL) {
+			let iFrame = document.createElement("iframe");
+				iFrame.src = this.windowOptions.URL;
+
+			iFrame.style.border = "0";
+			iFrame.style.margin = "0";
+			iFrame.style.padding = "0";
+			iFrame.style.width = "100%";
+			iFrame.style.height = "100%";
+
+			this.windowOptions.Content = iFrame;
+		}
+	}
+
+	getRootElement() {
+		if (!this.windowElement)
+			throw new InvalidStateException("getRootElement");
+
+		if (this.windowOptions.URL)
+			return this.windowElement.querySelector("iframe").contentDocument.body;
+		else
+			return this.windowElement.querySelector("div.contentWrapper > div.Content");
+	}
+
+	async getWindow () {
+		let This = this;
+
+		if (This.windowMounted)
+			return This.windowElement;
+
+		let windowOptions = this.windowOptions;
+
+		let Controls = "";
+
+		if (windowOptions.statusBar &amp;&amp; (
+			windowOptions.controlToggle ||
+			windowOptions.controlMin ||
+			windowOptions.controlClose))
+			Controls += '&lt;div class="Menu">' + (windowOptions.controlMin ? '&lt;div class="Minimize">&lt;div>&lt;/div>&lt;div>&lt;/div>&lt;/div>' : "") + (windowOptions.controlToggle ? '&lt;div class="Toggle ' + (windowOptions.maxSize ? "Smaller" : "Bigger") + '">&lt;div>&lt;/div>&lt;div>&lt;/div>&lt;/div>' : "") + (windowOptions.controlClose ? '&lt;div class="Close">&lt;div>&lt;/div>&lt;div>&lt;/div>&lt;/div>' : "") + "&lt;/div>";
+
+		if (windowOptions.hasOwnProperty("Icon"))
+			windowOptions.iconStyle = "background:url('" + xDMS.UI.iconPath(windowOptions.Icon) + "');";
+
+		let windowId = Math.round(Math.random() * 10000);
+		while ($("#Window" + windowId).length)
+			windowId = windowId = Math.round(Math.random() * 10000);
+
+		this.windowElement = $(`&lt;div
+			class="Window ${windowOptions.Theme}${windowOptions.maxSize ? " maxSize" : ""}" id="Window${windowId}">
+			&lt;div class="Info">
+				&lt;div class="Title notSelectable">
+					${(windowOptions.hasOwnProperty("iconStyle") ? `&lt;div class="Icon" style="${windowOptions.iconStyle}">${windowOptions.Title || This.windowName}&lt;/div>` : (windowOptions.Title || This.windowName))}
+				&lt;/div>
+				${Controls}
+			&lt;/div>
+			&lt;div class="contentWrapper">
+				&lt;div class="Content">&lt;/div>
+			&lt;/div>
+		&lt;/div>`).appendTo(windowOptions.Container)[0];
+
+		let contentElement = this.windowElement.querySelector("div.contentWrapper > div.Content");
+
+		windowOptions.windowClasses.forEach((someClass) => this.windowElement.classList.add(someClass));
+		windowOptions.contentClasses.forEach((someClass) => contentElement.classList.add(someClass));
+
+		Object.keys(windowOptions.windowStyles).forEach((styleProperty) => this.windowElement.style[styleProperty] = windowOptions.windowStyles[styleProperty]);
+		Object.keys(windowOptions.contentStyles).forEach((styleProperty) => contentElement.style[styleProperty] = windowOptions.contentStyles[styleProperty]);
+
+		if (typeof windowOptions.Content === "string")
+			contentElement.innerHTML = windowOptions.Content;
+		else if (windowOptions.Content instanceof HTMLElement)
+			contentElement.appendChild(windowOptions.Content);
+
+		if (windowOptions.useFullSize) {
+			this.windowElement.style.width = "100%";
+			this.windowElement.style.height = "100%";
+		}
+
+		// Post append actions
+		let createPromise = new Promise(function (onSuccess) {
+			$(This.windowElement).animate({
+					opacity: 1,
+				/**
+					left: Math.max(0, (($(xDMS.UI.defaultContainer).width() - Window.outerWidth()) / 2) + $(xDMS.UI.defaultContainer).scrollLeft()),
+					top: 100*/
+				},
+				windowOptions.transitionDuration,
+				windowOptions.easingFunction,
+				function () {
+					This.windowMounted = true;
+					return onSuccess();
+				}
+			);
+		});
+
+		await createPromise;
+
+		// Set Window to the DOM representation of the jQuery object
+		/*
+		Window = Window[0];
+
+		Window.Options = windowOptions;
+		windowOptions.isResizable = windowOptions.isResizableCurrentlyDisabled = false;
+
+		Window.isUserClosing = true;*/
+		//console.log(windowOptions);
+
+		this.Close = function () {
+			this.isUserClosing = true;
+
+			this.windowElement.parentNode.removeChild(this.windowElement);
+		}
+
+		this.toggleSize = function () { return xDMS.UI.Window.toggleSize(This); }
+		this.toggleToggleButton = function (forceToBigger) { return xDMS.UI.Window.toggleToggleButton(This, forceToBigger); }
+		this.resetSize = function (skipPositionReset, additionalProperties) { xDMS.UI.Window.resetSize(This, skipPositionReset, additionalProperties); }
+		this.maxSize = windowOptions.maxSize || false;
+		this.onRemove =
+			((typeof windowOptions.onRemove === "function") ? [windowOptions.onRemove] : ((windowOptions.onRemove instanceof Array) ? windowOptions.onRemove : []));
+
+		this.snappedLeft = false;
+		this.snappedRight = false;
+
+		if (windowOptions.Draggable) {
+			$(This.windowElement).draggable({handle: ".Info", scroll: false});
+
+			if (false) {
+				// Make it possible to toggle a window (to windowed mode) by dragging it a bit in fullscreen mode
+				var $titleBar = $(this.windowElement.querySelector(".Info"));
+
+				$(this.windowElement).on("dragstart", function (ePre) {
+					let xPre = ePre.clientX,
+						yPre = ePre.clientY;
+
+					if (yPre > 16)
+						$(This.windowElement).on("drag", function (eCur) {
+							if (eCur.clientY &lt; 16) {
+								This.toggleSize();
+								This.toggleToggleButton();
+								$(This.windowElement).off("drag");
+
+								return false;
+							}
+						});
+
+					if (xPre > 16)
+						$(This.windowElement).on("drag", function (eCur) {
+							if (eCur.clientX &lt; 16) {
+								Window.snappedLeft = true;
+								This.maxSize = false;
+								$(This.windowElement).animate({
+									top: 0,
+									left: 0,
+									height: "100%",
+									width: "50%"
+								}, xDMS.UI.transitionDuration, xDMS.UI.easingFunction).off("drag");
+								//Window.toggleToggleButton();
+								return false;
+							}
+						});
+				}).on("dragstop", function () {
+					Window.jQuery().off("drag");
+					if (Window.getBoundingClientRect().top &lt; 0)
+						Window.style.top = "0px";
+				});
+
+				$titleBar.on("mousedown.xDMS", function (ePre) {
+					if ($(ePre.target).hasClass("Menu")) return;
+					var winOffsetPre = Window.getBoundingClientRect(),
+						xPre = ePre.clientX,
+						yPre = ePre.clientY,
+						clearHandle = function () {
+							$titleBar.trigger("mouseup.xDMS").off("mousemove.xDMS mouseleave.xDMS");
+							Window.jQuery().off("mousemove.xDMS");
+						}
+
+					if (!Window.maxSize &amp;&amp; !Window.snappedLeft &amp;&amp; !Window.snappedRight &amp;&amp; xPre > 16 &amp;&amp; yPre > 16)
+						Window.Location = Window.getBoundingClientRect();
+
+					$titleBar.one("mouseup.xDMS mouseleave.xDMS", function () {
+						Window.jQuery().off("mousemove.xDMS");
+					});
+
+					Window.jQuery().on("mousemove.xDMS", function (ePost) {
+						var xPost = ePost.clientX,
+							yPost = ePost.clientY;
+
+						if (Window.maxSize) {
+							if (Math.abs(yPost - yPre) > 1) {
+								clearHandle();
+								var xNew = xPost - Math.abs(xPre - xPost),
+									yNew = yPost;
+
+								while ((xNew + parseInt(Window.Location.width)) > winOffsetPre.width)
+									xNew -= 10;
+
+								var animationProperties = {
+									width: Window.Location.width || Window.Options.windowStyle.width || xDMS.UI.Window.Standard.windowStyle.width,
+									height: Window.Location.height || Window.Options.windowStyle.height || xDMS.UI.Window.Standard.windowStyle.height,
+									top: yNew,
+									left: xNew
+								}
+
+								Window.toggleToggleButton();
+								Window.maxSize = false;
+								Window.jQuery().animate(animationProperties, xDMS.UI.transitionDuration, xDMS.UI.easingFunction);
+
+								if (Window.Options.Resizable)
+									Window.jQuery().resizable("enable");
+							}
+							;
+						} else {
+							var curWindowProperties = Window.getBoundingClientRect();
+							if (Window.snappedLeft || Window.snappedRight) {
+								if (Math.abs(xPost - xPre) > 4) {
+									clearHandle();
+									Window.maxSize = Window.snappedLeft = Window.snappedRight = false;
+									Window.resetSize();
+								}
+							} else if (curWindowProperties.top &lt; 0 || curWindowProperties.left &lt; 0) {
+								clearHandle();
+								Window.maxSize = false;
+
+								if (curWindowProperties.top &lt; 0)
+									Window.style.top = "0px";
+								else if (curWindowProperties.left &lt; 0)
+									Window.style.left = "0px";
+							}
+						}
+					});
+				});
+			}
+		}
+
+		This.isResizable = false;
+		This.isResizableCurrentlyDisabled = false;
+		if (windowOptions.Resizable)
+			This.toggleResizable();
+
+		if (windowOptions.controlClose)
+			$(this.windowElement.querySelector(".Info .Menu .Close")).on("click", function () {
+				This.Close();
+			});
+		if (windowOptions.controlToggle) {
+			$(this.windowElement.querySelector(".Info")).on("dblclick", function () {
+				This.toggleToggleButton();
+				This.toggleSize();
+			});
+
+			$(this.windowElement.querySelector(".Info .Menu .Toggle")).on("click", function () {
+				This.toggleToggleButton();
+				This.toggleResizable();
+				This.toggleSize();
+			});
+		}
+
+		/*
+		xDMS.UI.Window.Controllable(Window);
+		if (xDMS.UI.resPos &amp;&amp; ((Options.resPos) || xDMS.UI.Window.Standard.resPos.Enable) &amp;&amp; (typeof Options.windowStyle === "object" || typeof Options.resPos.Queries === "object"))
+			xDMS.UI.resPos.Set(Window, {
+				Queries: Options.resPos.Queries || Options.windowStyle,
+				Check: Options.resPos.Check || function () {
+					return !Window.maxSize;
+				}
+			});*/
+
+		/*
+		if (Options.Draggable || xDMS.UI.Window.Standard.Draggable) {
+			xDMS.UI.Window.Draggable(Window);
+			Window.snappedLeft = Window.snappedRight = false;
+		}
+
+		if (Options.Resizable) xDMS.UI.Window.toggleResizable(Window);
+		if (Options.hasOwnProperty("onCreate") &amp;&amp; typeof Options.onCreate === "function") Options.onCreate(Window);
+
+		 */
+
+		return This.windowElement;
+	}
+
+	toggleResizable () {
+		let This = this;
+		let windowElement = this.windowElement;
+		if (!windowElement)
+			throw new InvalidStateException("windowElement");
+
+		if (This.isResizable) {
+			$(windowElement).resizable("disable");
+			This.isResizableCurrentlyDisabled = true;
+		} else {
+			if (This.isResizableCurrentlyDisabled) {
+				$(windowElement).resizable("enable");
+				This.isResizableCurrentlyDisabled = false;
+			} else {
+				var resizableConfiguration = {
+					autoHide: true,
+					handles: "n, nw, w, sw, s, se, e, ne"
+				}
+
+				// Check if resizeContentElement is true; if true, the content element itself will also be resized directly according to the cursor position
+				if (This.windowOptions.resizeContentElement === true) {
+					resizableConfiguration.start = function (eventStart) {
+						let contentElement = This.getRootElement(),
+							startLocation = contentElement.getBoundingClientRect();
+
+						if (eventStart.clientY >= (startLocation.top + startLocation.height) - 16) {
+							windowElement.resizeHandleFunction = function (Event) {
+								contentElement.style.height = Math.abs(Event.clientY - startLocation.top) + "px";
+							}
+
+							document.addEventListener("mousemove", Window.windowElement);
+						}
+					}
+					resizableConfiguration.stop = function () {
+						document.removeEventListener("mousemove", Window.windowElement);
+					}
+				}
+
+				$(windowElement).resizable(resizableConfiguration);
+			}
+		}
+
+		windowElement.isResizable = !windowElement.isResizable;
+		return true;
+	}
+}
+
+export default ViewWindowController;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="Client_StoreReducable%250ASee%2520classmodule_.html">Client/StoreReducable
+See class</a></li><li><a href="Client_UI_AssetManager%250ASee%2520classmodule_.html">Client/UI/AssetManager
+See class</a></li><li><a href="Client_UI_AssetType%250DSee%2520classmodule_.html">Client/UI/AssetTypeSee class</a></li><li><a href="Entities_Config_ConfigSet%250DSee%2520class%2520descriptionmodule_.html">Entities/Config/ConfigSetSee class description</a></li><li><a href="module-Client_ComponentConnectorInterface.html">Client/ComponentConnectorInterface</a></li><li><a href="module-Client_ComponentConnectorReducable.html">Client/ComponentConnectorReducable</a></li><li><a href="module-Client_Store.html">Client/Store</a></li><li><a href="module-Client_UI_Components_EntityListInterface.html">Client/UI/Components/EntityListInterface</a></li><li><a href="module-Client_UI_Components_PropertyToggleInterface.html">Client/UI/Components/PropertyToggleInterface</a></li><li><a href="module-Client_UI_ReactableDOMInterface.html">Client/UI/ReactableDOMInterface</a></li><li><a href="module-Client_UI_ReactableInterface.html">Client/UI/ReactableInterface</a></li><li><a href="module-Client_UI_UIXAlert.html">Client/UI/UIXAlert</a></li><li><a href="module-Client_UI_UIXElement.html">Client/UI/UIXElement</a></li><li><a href="module-Client_UI_UIXGenericContainer.html">Client/UI/UIXGenericContainer</a></li><li><a href="module-Client_UI_UIXTemplate.html">Client/UI/UIXTemplate</a></li><li><a href="module-Client_UI_ViewComponent.html">Client/UI/ViewComponent</a></li><li><a href="module-Client_UI_ViewFragment.html">Client/UI/ViewFragment</a></li><li><a href="module-Client_UI_xInteraction.html">Client/UI/xInteraction</a></li><li><a href="module-Communication_CommunicationDataRequest.html">Communication/CommunicationDataRequest</a></li><li><a href="module-Core_IDGenerator.html">Core/IDGenerator</a></li><li><a href="module-Core_IDGeneratorNumeric.html">Core/IDGeneratorNumeric</a></li><li><a href="module-Core_ProtectedNamespace.html">Core/ProtectedNamespace</a></li><li><a href="module-Core_UniqueNamespace.html">Core/UniqueNamespace</a></li><li><a href="module-Entities_Client_PersistentStorage.html">Entities/Client/PersistentStorage</a></li><li><a href="module-Entities_Communication_CommunicationSocket.html">Entities/Communication/CommunicationSocket</a></li><li><a href="module-Entities_Communication_DataEndpointInterface.html">Entities/Communication/DataEndpointInterface</a></li><li><a href="module-Entities_Communication_DataEndpointInterfaceRW.html">Entities/Communication/DataEndpointInterfaceRW</a></li><li><a href="module-Entities_Core_FlectionProvider.html">Entities/Core/FlectionProvider</a></li><li><a href="module-Entities_Event_Namespace.html">Entities/Event/Namespace</a></li><li><a href="module-Exceptions_AccessDeniedException.html">Exceptions/AccessDeniedException</a></li><li><a href="module-Exceptions_GenericException.html">Exceptions/GenericException</a></li><li><a href="module-Exceptions_InvalidEntityException.html">Exceptions/InvalidEntityException</a></li><li><a href="module-Exceptions_InvalidStateException.html">Exceptions/InvalidStateException</a></li><li><a href="module-Exceptions_InvalidTypeException.html">Exceptions/InvalidTypeException</a></li><li><a href="module-Exceptions_NotFoundException.html">Exceptions/NotFoundException</a></li><li><a href="module-Exceptions_NotImplementedException.html">Exceptions/NotImplementedException</a></li><li><a href="module-Exceptions_RequestTimeoutException.html">Exceptions/RequestTimeoutException</a></li><li><a href="module-Exceptions_UnexpectedIdentifierException.html">Exceptions/UnexpectedIdentifierException</a></li><li><a href="module-Exceptions_UniquenessViolationException.html">Exceptions/UniquenessViolationException</a></li><li><a href="module-ObjectList.html">ObjectList</a></li><li><a href="module-Server_ConnectionProvider.html">Server/ConnectionProvider</a></li><li><a href="module-Server_ConnectionProviderSIO.html">Server/ConnectionProviderSIO</a></li><li><a href="module-Server_ConnectionProviderTLS.html">Server/ConnectionProviderTLS</a></li><li><a href="module-Server_IDGeneratorUUIDv4.html">Server/IDGeneratorUUIDv4</a></li><li><a href="module-Server_PersistentStorageFS.html">Server/PersistentStorageFS</a></li><li><a href="module-Storage_GenericStorage.html">Storage/GenericStorage</a></li><li><a href="module-UDBI_Core.html">UDBI/Core</a></li><li><a href="module-UDBI_EntityModel.html">UDBI/EntityModel</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeBigInteger.html">UDBI/FieldTypes/FieldTypeBigInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeFloat.html">UDBI/FieldTypes/FieldTypeFloat</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeGeneric.html">UDBI/FieldTypes/FieldTypeGeneric</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeInteger.html">UDBI/FieldTypes/FieldTypeInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeString.html">UDBI/FieldTypes/FieldTypeString</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeText.html">UDBI/FieldTypes/FieldTypeText</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp.html">UDBI/FieldTypes/FieldTypeTimestamp</a></li><li><a href="module-UDBI_ManyToOne.html">UDBI/ManyToOne</a></li><li><a href="module-UDBI_ObjectManager.html">UDBI/ObjectManager</a></li><li><a href="module-UDBI_OneToOne.html">UDBI/OneToOne</a></li><li><a href="module-UDBIAdapters_IDB.html">UDBIAdapters/IDB</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-This.html#.Request">Request</a></li><li><a href="-_anonymous_-This.Start.html">Start</a></li><li><a href="-_anonymous_-This.html#.Use">Use</a></li><li><a href="Client_StoreReducable%250ASee%2520classmodule_-PrefixedReducerManager.html">PrefixedReducerManager</a></li><li><a href="Client_StoreReducable%250ASee%2520classmodule_-StoreReducable.html">StoreReducable</a></li><li><a href="Client_UI_AssetManager%250ASee%2520classmodule_-AssetManager.html">AssetManager</a></li><li><a href="Client_UI_AssetType%250DSee%2520classmodule_-AssetType.html">AssetType</a></li><li><a href="CollectionEditor.html">CollectionEditor</a></li><li><a href="CookieStorage.html">CookieStorage</a></li><li><a href="Entities_Config_ConfigSet%250DSee%2520class%2520descriptionmodule_-ConfigSet.html">ConfigSet</a></li><li><a href="EntityDiffRequest.html">EntityDiffRequest</a></li><li><a href="EntityStorage.html">EntityStorage</a></li><li><a href="IllegalParallelEditException.html">IllegalParallelEditException</a></li><li><a href="LoginRequestInterface.html">LoginRequestInterface</a></li><li><a href="module.exports.html">exports</a></li><li><a href="module-Client_ComponentConnectorInterface-ComponentConnectorInterface.html">ComponentConnectorInterface</a></li><li><a href="module-Client_ComponentConnectorReducable-ComponentConnectorReducable.html">ComponentConnectorReducable</a></li><li><a href="module-Client_Store-PatchedStoreUpdate.html">PatchedStoreUpdate</a></li><li><a href="module-Client_Store-Store.html">Store</a></li><li><a href="module-Client_UI_UIXAlert-UIXAlert.html">UIXAlert</a></li><li><a href="module-Client_UI_UIXElement-UIXElement.html">UIXElement</a></li><li><a href="module-Client_UI_UIXGenericContainer-UIXGenericContainer.html">UIXGenericContainer</a></li><li><a href="module-Client_UI_UIXTemplate-UIXTemplate.html">UIXTemplate</a></li><li><a href="module-Client_UI_ViewComponent-ViewComponent.html">ViewComponent</a></li><li><a href="module-Client_UI_xInteraction-xInteraction.html">xInteraction</a></li><li><a href="module-Communication_CommunicationDataRequest-CommunicationDataRequest.html">CommunicationDataRequest</a></li><li><a href="module-Core_IDGeneratorNumeric-IDGeneratorNumeric.html">IDGeneratorNumeric</a></li><li><a href="module-Core_IDGenerator-IDGenerator.html">IDGenerator</a></li><li><a href="module-Core_UniqueNamespace-UniqueNamespace.html">UniqueNamespace</a></li><li><a href="module-Entities_Client_PersistentStorage.html">Entities/Client/PersistentStorage</a></li><li><a href="module-Entities_Communication_CommunicationSocket-CommunicationSocket.html">CommunicationSocket</a></li><li><a href="module-Entities_Communication_DataEndpointInterfaceRW-DataEndpointInterfaceRW.html">DataEndpointInterfaceRW</a></li><li><a href="module-Entities_Communication_DataEndpointInterface-DataEndpointInterface.html">DataEndpointInterface</a></li><li><a href="module-Entities_Event_Namespace-EventListenerEntry.html">EventListenerEntry</a></li><li><a href="module-Entities_Event_Namespace-EventNamespace_ListenerEntry.html">ListenerEntry</a></li><li><a href="module-Entities_Event_Namespace-EventNamespace_Register.html">Register</a></li><li><a href="module-Exceptions_AccessDeniedException.html">Exceptions/AccessDeniedException</a></li><li><a href="module-Exceptions_GenericException.html">Exceptions/GenericException</a></li><li><a href="module-Exceptions_InvalidEntityException.html">Exceptions/InvalidEntityException</a></li><li><a href="module-Exceptions_InvalidStateException.html">Exceptions/InvalidStateException</a></li><li><a href="module-Exceptions_InvalidTypeException.html">Exceptions/InvalidTypeException</a></li><li><a href="module-Exceptions_NotFoundException.html">Exceptions/NotFoundException</a></li><li><a href="module-Exceptions_NotImplementedException.html">Exceptions/NotImplementedException</a></li><li><a href="module-Exceptions_RequestTimeoutException.html">Exceptions/RequestTimeoutException</a></li><li><a href="module-Exceptions_UnexpectedIdentifierException.html">Exceptions/UnexpectedIdentifierException</a></li><li><a href="module-Exceptions_UniquenessViolationException.html">Exceptions/UniquenessViolationException</a></li><li><a href="module-ObjectList-ObjectList.html">ObjectList</a></li><li><a href="module-Server_ConnectionProviderTLS-ConnectionProviderTLS.html">ConnectionProviderTLS</a></li><li><a href="module-Server_ConnectionProvider-ConnectionProvider.html">ConnectionProvider</a></li><li><a href="module-Server_IDGeneratorUUIDv4-IDGeneratorUUIDv4.html">IDGeneratorUUIDv4</a></li><li><a href="module-Server_PersistentStorageFS.html">Server/PersistentStorageFS</a></li><li><a href="module-Storage_GenericStorage.html">Storage/GenericStorage</a></li><li><a href="module-UDBI_Core-UDBIDatabase.html">UDBIDatabase</a></li><li><a href="module-UDBI_Core-UDBITable.html">UDBITable</a></li><li><a href="module-UDBI_Core-UDBITableSchema.html">UDBITableSchema</a></li><li><a href="module-UDBI_EntityModel-UDBIEntityModel.html">UDBIEntityModel</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeBigInteger-FieldTypeBigInteger.html">FieldTypeBigInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeFloat-FieldTypeFloat.html">FieldTypeFloat</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeGeneric-FieldTypeGeneric.html">FieldTypeGeneric</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeInteger-FieldTypeInteger.html">FieldTypeInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeString-FieldTypeString.html">FieldTypeString</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeText-FieldTypeText.html">FieldTypeText</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp-FieldTypeTimestamp.html">FieldTypeTimestamp</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp-FieldTypeTimestampValueNow.html">FieldTypeTimestampValueNow</a></li><li><a href="module-UDBI_ManyToOne-ManyToOne.html">ManyToOne</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager.html">ObjectManager</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager_Flush.html">Flush</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager_Query.html">Query</a></li><li><a href="module-UDBI_ObjectManager-ObjectRepository.html">ObjectRepository</a></li><li><a href="module-UDBI_OneToOne-OneToOne.html">OneToOne</a></li><li><a href="module-UDBIAdapters_IDB-IDBDatabaseReference.html">IDBDatabaseReference</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManager.html">IDBObjectManager</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerCustomIndex.html">IDBObjectManagerCustomIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerGeneratedIndex.html">IDBObjectManagerGeneratedIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerIndex.html">IDBObjectManagerIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerIndexEntry.html">IDBObjectManagerIndexEntry</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerPrimaryKey.html">IDBObjectManagerPrimaryKey</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectQuery.html">IDBObjectQuery</a></li><li><a href="module-UDBIAdapters_IDB-IDBTable.html">IDBTable</a></li><li><a href="module-UDBIAdapters_IDB-IDBUDBIDatabase.html">IDBUDBIDatabase</a></li><li><a href="MySQLDatabase.html">MySQLDatabase</a></li><li><a href="MySQLDBConnectionDescriptor.html">MySQLDBConnectionDescriptor</a></li><li><a href="MySQLObjectManager.html">MySQLObjectManager</a></li><li><a href="MySQLSchemaBuilder.html">MySQLSchemaBuilder</a></li><li><a href="MySQLTable.html">MySQLTable</a></li><li><a href="PopupWindowController.html">PopupWindowController</a></li><li><a href="PropertyConstraint.html">PropertyConstraint</a></li><li><a href="PropertyConstraintAttached.html">PropertyConstraintAttached</a></li><li><a href="PropertyConstraintItemInList.html">PropertyConstraintItemInList</a></li><li><a href="PropertyEditor.html">PropertyEditor</a></li><li><a href="PropertyType.html">PropertyType</a></li><li><a href="PropertyTypeCollection.html">PropertyTypeCollection</a></li><li><a href="PropertyTypeObject.html">PropertyTypeObject</a></li><li><a href="SessionInterface.html">SessionInterface</a></li><li><a href="SyncAction.html">SyncAction</a></li><li><a href="SyncedEntityStorage.html">SyncedEntityStorage</a></li><li><a href="ViewWindowController.html">ViewWindowController</a></li><li><a href="WindowControllerInterface.html">WindowControllerInterface</a></li><li><a href="xDMS.UIX.Providers.assetManager.Resource.html">Resource</a></li></ul><h3>Interfaces</h3><ul><li><a href="SyncedPropertyTypeObjectInterface.html">SyncedPropertyTypeObjectInterface</a></li></ul><h3>Global</h3><ul><li><a href="global.html#FULL_TREE">FULL_TREE</a></li><li><a href="global.html#isObject">isObject</a></li><li><a href="global.html#rootEntityStorageCollection">rootEntityStorageCollection</a></li><li><a href="global.html#SPLIT_TREE">SPLIT_TREE</a></li><li><a href="global.html#ViewWindowsControllerDefaults">ViewWindowsControllerDefaults</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Jan 10 2021 14:05:14 GMT+0100 (Mitteleuropäische Normalzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

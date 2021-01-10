@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Client/PropertyEditor/PropertyEditor.mjs</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Client/PropertyEditor/PropertyEditor.mjs</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * PropertyType, PropertyEditor, PropertyTypeDayPHP, PropertyTypeObject, PropertyTypeCollection
+ * by Bryan Bliewert, 2020
+ *
+ * Set of classes for manipulating entities
+ * Allows type-checking and serialization of an arbitrary number of properties of an arbitrary number of entities
+ */
+
+/**
+ * A custom property type
+ */
+class PropertyType {
+	/**
+	 *
+	 * @param {string} typeName
+	 * @param {function} Validator - Passed a value that may be checked against this type
+	 */
+	constructor(
+		typeName,
+		Validator,
+	) {
+		typeName = typeName;
+
+		/**
+		 * Checks if the given value matches this type
+		 * @param someValue
+		 * @returns {boolean}
+		 */
+		this.Validate = function (someValue) {
+			return !!Validator(someValue);
+		}
+	}
+}
+
+class PropertyTypeNone extends PropertyType {
+	constructor() {
+		super("GenericNone", (val) => (val &amp;&amp; val instanceof PropertyTypeNone));
+	}
+}
+
+/**
+ * Allows validating and comparing object by using serialization to strings
+ * @class
+ */
+class PropertyTypeObject extends PropertyType {
+	constructor () {
+		super("GenericObject", (val) => typeof val === "object");
+
+		let This = this;
+
+		/**
+		 * @type {PropertyType|string}
+		 */
+		this.Properties = {};
+
+		/**
+		 * @type {Object&lt;string,any>}
+		 */
+		this.defaultValues = {};
+
+		/**
+		 * @type {Object&lt;string, string|number>}
+		 */
+		this.emptyValues = {};
+
+		/**
+		 * Registers a new property for this (otherwise) generic object
+		 * @param {string} Name
+		 * @param {PropertyType|string} propertyType
+		 * @param {string|number [defaultValue]
+		 * @param {string|number} [emptyValue]
+		 * @returns {PropertyTypeObject}
+		 */
+		this.defineProperty = function (
+			Name,
+			propertyType,
+			defaultValue,
+			emptyValue
+		) {
+			if (!this.Properties[Name])
+				this.Properties[Name] = propertyType;
+
+			if (typeof defaultValue !== "undefined")
+				this.defaultValues[Name] = defaultValue;
+
+			if (typeof emptyValue !== "undefined")
+				this.emptyValues[Name] = emptyValue;
+
+			return this;
+		}
+
+		/**
+		 *
+		 * @returns {string[]}
+		 */
+		this.definedPropertyNames = function () {
+			return Object.keys(This.Properties);
+		}
+
+		/**
+		 * @returns {Object&lt;string, PropertyType|string>}
+		 */
+		this.definedPropertyItems = function () {
+			return This.Properties;
+		}
+
+		/**
+		 * Clone an object matching this type using the default values
+		 * @returns {{}}
+		 */
+		this.createRawDefault = function () {
+			let result = Object.assign({}, This.defaultValues);
+
+			return result;
+		}
+
+		/**
+		 * For deletion of objects, it is neccessary to define an "empty representation"
+		 * Per default, we treat completely objects with completely zeroed properties as deleted
+		 * @param {Object} someObject
+		 */
+		this.isEmpty = function (someObject) {
+			return (someObject &amp;&amp; Object.keys(This.Properties).every((propertyName) => (someObject[propertyName] == (typeof This.emptyValues[propertyName] !== "undefined" ? This.emptyValues[propertyName] : 0)) ));
+		}
+
+		/**
+		 * Returns an entity representing an empty data structure
+		 * @returns {{}}
+		 */
+		this.getEmpty = function () {
+			let emptyEntity = {};
+
+			for (let Property of This.definedPropertyNames())
+				emptyEntity[Property] = 0;
+
+			return emptyEntity;
+		}
+
+	}
+}
+
+/**
+ * Allows comparing arrays of items with each other using serialization.
+ * If an entityType is set manually, its validation and serialization will be used for all children.
+ * @class
+ */
+class PropertyTypeCollection extends PropertyType {
+	/**
+	 *
+	 * @param {PropertyType|PropertyTypeObject} [entityType] - May also be supplied later with setEntityType
+	 */
+	constructor(
+		entityType = null
+	) {
+		super("GenericCollection");
+
+		/**
+		 * @type {PropertyTypeObject|PropertyType}
+		 */
+		this.entityType = entityType;
+
+		/**
+		 * The maximum amount of children this collection may hold to be validated
+		 * @type {number}
+		 */
+		this.maxMembers = Infinity;
+
+		/**
+		 * Assigns this collection the type of entities it will manage. Allows for full-fetched parsing
+		 * @param {PropertyTypeObject|PropertyType} propertyType
+		 * @returns {PropertyTypeCollection}
+		 */
+		this.setEntityType = function (propertyType) {
+			this.entityType = propertyType;
+			return this;
+		}
+
+		/**
+		 * Returns the currently assigned PropertyType instance
+		 * @returns {PropertyTypeObject}
+		 */
+		this.getEntityType = function () {
+			return this.entityType;
+		}
+
+		/**
+		 * The legacy meaning of "deleting" is setting all properties to 0 :)
+		 * @param {array|object} someArrayOrObject
+		 * @param {number} itemIndex
+		 * @returns {PropertyTypeCollection}
+		 */
+		this.deleteItem = function (someArrayOrObject, itemIndex) {
+			someArrayOrObject[itemIndex] = Object.assign({}, this.entityType.getEmpty());
+
+			return this;
+		}
+
+		/**
+		 * Set the new maximum
+		 * @param {number} aLimit
+		 * @returns {PropertyTypeCollection}
+		 */
+		this.setMaximumMembers = function (aLimit) {
+			this.maxMembers = aLimit;
+
+			return this;
+		}
+
+		/**
+		 * Return the current maximum
+		 * @returns {number}
+		 */
+		this.getMaximumMembers = function () {
+			return this.maxMembers;
+		}
+	}
+}
+
+/**
+ * Editor for one-dimensional entities e.g. { a: string, b: number, } i.e. no sub-objects!
+ * @class
+ */
+class PropertyEditor {
+	/**
+	 *
+	 * @param {object&lt;string, object>} KeyedEntities
+	 */
+	constructor(
+		KeyedEntities
+	) {
+		let
+			/**
+			 * Stores all definedProperty items in propertyName: PropertyType structure
+			 * @type {object&lt;string, PropertyType|string>}
+			 */
+			Properties = {},
+
+			This = this;
+
+		/**
+		 * Stores all local edits to entities in entityID: entityEdits structure
+		 * entityEdits is an object including only properties which differ from the original entity
+		 * @type {object&lt;string, object>}
+		 */
+		this.Edits = {};
+
+		this.Entities = KeyedEntities;
+
+		/**
+		 *
+		 * @param {object&lt;string, object>} newKeyedEntities
+		 */
+		this.setEntities = function (newKeyedEntities) {
+			this.Entities = newKeyedEntities;
+		}
+
+		this.getEdits = function () {
+			return Object.assign({}, this.Edits);
+		}
+
+		/**
+		 *
+		 * @param {string} Name
+		 * @param {PropertyType|string} someType
+		 * @returns {PropertyEditor}
+		 */
+		this.defineProperty = function (Name, someType) {
+			if (Properties[Name])
+				throw new Error(`Property ${Name} already defined`);
+
+			if (!someType || (!(someType instanceof PropertyType) &amp;&amp; typeof someType !== "string"))
+				throw new Error(`Invalid Property given`);
+
+			Properties[Name] = someType;
+
+			return this;
+		}
+
+		/**
+		 * Get all definedProperty names
+		 * @returns {string[]}
+		 */
+		this.definedPropertyNames = function () {
+			return Object.keys(Properties);
+		}
+
+		/**
+		 *
+		 * @param {string} entityID
+		 * @param {string} Property
+		 * @param {string|object} newValue - Object is only allowed, if correct diffing is done manually and isDiffed is set to true
+		 * @param {boolean} [isDiffed] - Switch to true to do diffing externally
+		 * @returns {PropertyEditor}
+		 */
+		this.Edit = function (
+			entityID,
+			Property,
+			newValue,
+			isDiffed = false
+		) {
+			if (!this.Edits[entityID])
+				this.Edits[entityID] = {}
+
+			if (isDiffed) {
+				if (newValue === undefined)
+					delete this.Edits[entityID][Property];
+				else
+					this.Edits[entityID][Property] = newValue;
+
+				if (!Object.keys(this.Edits[entityID]).length)
+					delete this.Edits[entityID];
+
+				return this;
+			}
+
+			// Check if the property matches a definedProperty (see defineProperty)
+			if (Properties[Property]) {
+				/**
+				 * @type {PropertyType}
+				 */
+				let Type = Properties[Property];
+				if (Type.isDiffable()) {
+					// If the type has a defined diffing function, use it
+					let diffingObject = Type.Diff(this.Entities[entityID][Property], newValue);
+					if (!Object.keys(diffingObject).length) {
+						delete this.Edits[entityID][Property];
+
+						if (!Object.keys(this.Edits[entityID]).length)
+							delete this.Edits[entityID];
+					} else {
+						this.Edits[entityID][Property] = diffingObject;
+					}
+				} else {
+					// In this case, the stringified values are compared
+
+					if (Type.Serialize(this.Entities[entityID][Property]) === newValue) {
+						delete this.Edits[entityID][Property];
+
+						if (!Object.keys(this.Edits[entityID]).length)
+							delete this.Edits[entityID];
+					} else {
+						this.Edits[entityID][Property] = Type.Parse(newValue);
+					}
+				}
+			} else {
+				// In this case, it's sufficient to compare the value directly using ===
+
+				// If the entered value is equal to original value, revert saved value
+				if (this.Entities[entityID][Property] === newValue) {
+					delete this.Edits[entityID][Property];
+
+					// delete user entry from the edits object altogether if there is no other changed value remaining
+					if (!Object.keys(this.Edits[entityID]).length)
+						delete this.Edits[entityID];
+				} else {
+					// save edited value
+					this.Edits[entityID][Property] = newValue;
+				}
+			}
+
+			return this;
+		}
+
+		/**
+		 * Clear the local edits of the given property of the given entity
+		 * @param {string} entityID
+		 * @param {string} propertyName
+		 * @returns {PropertyEditor}
+		 */
+		this.clearEntityProperty = function (
+			entityID,
+			propertyName
+		) {
+			return This.Edit(entityID, propertyName, undefined, true);
+		}
+
+		/**
+		 * Returns the value of a property merging a potential edit with the original value
+		 * @param {string} entityID
+		 * @param {string} propertyName
+		 * @returns {*}
+		 */
+		this.getMergedProperty = function (entityID, propertyName) {
+			let editedValue = (This.Edits[entityID] &amp;&amp; This.Edits[entityID].hasOwnProperty(propertyName)) ? This.Edits[entityID][propertyName] : undefined,
+				originalValue = (This.Entities[entityID] &amp;&amp; This.Entities[entityID].hasOwnProperty(propertyName)) ? This.Entities[entityID][propertyName] : undefined;
+
+			let returnValue = (editedValue !== undefined) ? editedValue : originalValue;
+
+			if (returnValue !== undefined &amp;&amp; Properties[propertyName]) {
+				let currentPropertyType = Properties[propertyName];
+				if (typeof currentPropertyType === "string") {
+					switch (currentPropertyType) {
+						case "string":
+							return "" + returnValue;
+
+						case "number":
+							return + returnValue;
+
+						default:
+							return returnValue;
+					}
+				} else
+					throw new Error("Parsing entities using PropertyType is not yet supported");
+				// TODO: For objects, iterate through each property and overwrite original values with changes
+			} else
+				return returnValue;
+		}
+
+		/**
+		 * Checks whether the entity corresponding to the given ID was edited
+		 * @param {string} entityID
+		 * @returns {boolean}
+		 */
+		this.isEdited = function (entityID) {
+			return (typeof this.Edits[entityID] !== "undefined");
+		}
+
+		/**
+		 * Check if the given property of the entity was edited
+		 * @param {string} entityID
+		 * @param {string} propertyName
+		 * @returns {boolean|boolean}
+		 */
+		this.isEditedProperty = function (entityID, propertyName) {
+			return (typeof this.Edits[entityID] !== "undefined" &amp;&amp; typeof this.Edits[entityID][propertyName] !== "undefined");
+		}
+
+		/**
+		 *
+		 * @param {string} entityID
+		 * @returns {PropertyEditor}
+		 */
+		this.clearEntity = function (
+			entityID
+		) {
+			delete this.Edits[entityID];
+
+			return this;
+		}
+
+		/**
+		 *
+		 * @returns {PropertyEditor}
+		 */
+		this.clearFull = function () {
+			for (let Property in this.Edits)
+				delete this.Edits[Property];
+
+			return this;
+		}
+	}
+}
+
+/**
+ * An editor for collections, i.e., arrays whose items do not have a unique ID (the case for many legacy properties)
+ * @class
+ */
+class CollectionEditor {
+	/**
+	 *
+	 * @param {PropertyTypeCollection|null} collectionType
+	 * @param {Array} [originalCollection]
+	 */
+	constructor(
+		collectionType = null,
+		originalCollection = [],
+	) {
+		let This = this;
+
+		/**
+		 * Stores all local edits to entities in entityIndex: entityEdits structure
+		 * entityEdits is an object including only properties which differ from the original entity
+		 * @type {object&lt;number, object>}
+		 */
+		this.Edits = {}
+
+		this.Collection = originalCollection;
+
+		this.Defauls = new Map([
+			["editsUndefinedIfEmpty", true] // If true, getEdits will return undefined if Edits is an empty object
+		]);
+
+		/**
+		 * Better integration is possible when a description of the collection is supplied
+		 * May be assigned later using setCollectionType
+		 * @type {PropertyTypeCollection}
+		 */
+		this.collectionType = collectionType;
+
+		/**
+		 * Reference to the entity children managed by this Editor
+		 * @type {PropertyTypeObject}
+		 */
+		this.entityType = collectionType.getEntityType();
+
+		/**
+		 * Checks if the given entity is empty
+		 * If thats the case, it may be deleted from the Edits object
+		 * 
+		 * @param {object} someEntity
+		 * @returns {boolean}
+		 */
+		let checkEmptyness = (this.entityType ? this.entityType.isEmpty : function (someEntity) {
+			return !Object.keys(someEntity).length;
+		});
+
+		/**
+		 * Defines how a deleted entity may be represented in the Edits object at a given index
+		 * @returns {undefined|object}
+		 */
+		let deletedEntity = (this.entityType ? this.entityType.getEmpty : function () {
+			return undefined;
+		});
+
+		/**
+		 * Stores a deletion of an entity in the edits
+		 * @param {number} itemIndex
+		 * @returns {CollectionEditor}
+		 */
+		this.deleteEntity = function (itemIndex) {
+			if (checkEmptyness(This.Collection[itemIndex]))
+				delete This.Edits[itemIndex];
+			else
+				This.Edits[itemIndex] = deletedEntity();
+
+			return This;
+		}
+
+		/**
+		 *
+		 * @param {number} collectionIndex
+		 * @param {string} Property
+		 * @param {string} newValue
+		 * @param {boolean} isDiffed
+		 * @returns {CollectionEditor}
+		 */
+		this.Edit = function (
+			collectionIndex,
+			Property,
+			newValue,
+			isDiffed = false
+		) {
+			if (!This.Edits[collectionIndex])
+				This.Edits[collectionIndex] = {}
+
+			if (isDiffed) {
+				This.Edits[collectionIndex][Property] = newValue;
+
+				if (checkEmptyness(This.Edits[collectionIndex]))
+					delete This.Edits[collectionIndex];
+
+				return This;
+			}
+
+			// Check if the property matches a definedProperty (see defineProperty)
+			if (This.entityType &amp;&amp; (typeof This.entityType.Properties[Property] === "object")) {
+				// In this case, the stringified values are compared
+				/**
+				 * @type {PropertyType}
+				 */
+				let Type = This.entityType.Properties[Property];
+
+				if (Type.Serialize(This.Collection[collectionIndex][Property]) === newValue) {
+					delete This.Edits[collectionIndex][Property];
+
+					if (!Object.keys(This.Edits[collectionIndex]).length /* ||checkEmptyness(This.Edits[collectionIndex]) */)
+						delete This.Edits[collectionIndex];
+				} else {
+					this.Edits[collectionIndex][Property] = Type.Parse(newValue);
+				}
+
+				// parse newValue using the Parse function
+			} else {
+				if (This.entityType.Properties[Property]) {
+					/**
+					 * In this case, a string type was supplied for the field
+					 * @type {string}
+					 */
+					let Type = This.entityType.Properties[Property];
+
+					// Cast type of supplied value
+					switch (Type) {
+						case "string":
+							newValue = "" + newValue;
+							break;
+
+						case "number":
+							newValue = + newValue;
+					}
+				} else
+					throw new Error(`Undefined property &lt;${Property}>`);
+
+				// If the entered value is equal to original value, revert saved value
+				if (This.Collection[collectionIndex][Property] === newValue) {
+					delete This.Edits[collectionIndex][Property];
+
+					// delete user entry from the edits object altogether if there is no other changed value remaining
+					if (!Object.keys(This.Edits[collectionIndex]).length /*|| checkEmptyness(This.Edits[collectionIndex])*/)
+						delete This.Edits[collectionIndex];
+				} else {
+					// save edited value
+					This.Edits[collectionIndex][Property] = newValue;
+				}
+			}
+
+			return This;
+		}
+
+		/**
+		 * Returns an array of the original collection merged with the edits
+		 * @returns {array}
+		 */
+		this.getMerged = function () {
+			let arrayLikeObject = Object.assign({}, This.Collection, This.getEdits());
+				arrayLikeObject.length = Object.keys(arrayLikeObject).length;
+
+				// NEEDS TO BE EDITED FOR EDITING COMPOUND TYPES
+
+			return Array.from(arrayLikeObject);
+		}
+
+		/**
+		 *
+		 * @returns {object&lt;number, object>|undefined}
+		 */
+		this.getEdits = function () {
+			if (Object.keys(This.Edits).length === 0 &amp;&amp; This.Defauls.get("editsUndefinedIfEmpty") === true)
+				return undefined;
+
+			return Object.assign({}, This.Edits);
+		}
+
+		/**
+		 *
+		 * @returns {boolean}
+		 */
+		this.isEdited = function () {
+			return !!Object.keys(This.Edits).length;
+		}
+
+		/**
+		 *
+		 * @param {array} anyCollection
+		 * @returns {CollectionEditor}
+		 */
+		this.setCollection = function (anyCollection) {
+			This.Collection = anyCollection;
+			originalCollection = anyCollection;
+
+			return This;
+		}
+
+		/**
+		 *
+		 * @param {PropertyTypeCollection} someCollectionType
+		 * @returns {CollectionEditor}
+		 */
+		this.setCollectionType = function (someCollectionType) {
+			This.collectionType = someCollectionType;
+			This.entityType = someCollectionType.getEntityType();
+
+			checkEmptyness = This.entityType.isEmpty;
+			deletedEntity = This.entityType.getEmpty;
+
+			return This;
+		}
+
+		/**
+		 *
+		 * @returns {PropertyTypeCollection|null}
+		 */
+		this.getCollectionType = function () {
+			return This.collectionType;
+		}
+
+		/**
+		 * Clears all edits and reverts to the last supplied collection
+		 * @returns {CollectionEditor}
+		 */
+		this.clearFull = function () {
+			This.Edits = {};
+
+			This.Collection = originalCollection;
+
+			return This;
+		}
+	}
+}
+
+export default PropertyEditor;
+export {
+	PropertyType,
+	PropertyTypeObject,
+	PropertyTypeNone,
+	PropertyTypeCollection,
+	CollectionEditor
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="Client_StoreReducable%250ASee%2520classmodule_.html">Client/StoreReducable
+See class</a></li><li><a href="Client_UI_AssetManager%250ASee%2520classmodule_.html">Client/UI/AssetManager
+See class</a></li><li><a href="Client_UI_AssetType%250DSee%2520classmodule_.html">Client/UI/AssetTypeSee class</a></li><li><a href="Entities_Config_ConfigSet%250DSee%2520class%2520descriptionmodule_.html">Entities/Config/ConfigSetSee class description</a></li><li><a href="module-Client_ComponentConnectorInterface.html">Client/ComponentConnectorInterface</a></li><li><a href="module-Client_ComponentConnectorReducable.html">Client/ComponentConnectorReducable</a></li><li><a href="module-Client_Store.html">Client/Store</a></li><li><a href="module-Client_UI_Components_EntityListInterface.html">Client/UI/Components/EntityListInterface</a></li><li><a href="module-Client_UI_Components_PropertyToggleInterface.html">Client/UI/Components/PropertyToggleInterface</a></li><li><a href="module-Client_UI_ReactableDOMInterface.html">Client/UI/ReactableDOMInterface</a></li><li><a href="module-Client_UI_ReactableInterface.html">Client/UI/ReactableInterface</a></li><li><a href="module-Client_UI_UIXAlert.html">Client/UI/UIXAlert</a></li><li><a href="module-Client_UI_UIXElement.html">Client/UI/UIXElement</a></li><li><a href="module-Client_UI_UIXGenericContainer.html">Client/UI/UIXGenericContainer</a></li><li><a href="module-Client_UI_UIXTemplate.html">Client/UI/UIXTemplate</a></li><li><a href="module-Client_UI_ViewComponent.html">Client/UI/ViewComponent</a></li><li><a href="module-Client_UI_ViewFragment.html">Client/UI/ViewFragment</a></li><li><a href="module-Client_UI_xInteraction.html">Client/UI/xInteraction</a></li><li><a href="module-Communication_CommunicationDataRequest.html">Communication/CommunicationDataRequest</a></li><li><a href="module-Core_IDGenerator.html">Core/IDGenerator</a></li><li><a href="module-Core_IDGeneratorNumeric.html">Core/IDGeneratorNumeric</a></li><li><a href="module-Core_ProtectedNamespace.html">Core/ProtectedNamespace</a></li><li><a href="module-Core_UniqueNamespace.html">Core/UniqueNamespace</a></li><li><a href="module-Entities_Client_PersistentStorage.html">Entities/Client/PersistentStorage</a></li><li><a href="module-Entities_Communication_CommunicationSocket.html">Entities/Communication/CommunicationSocket</a></li><li><a href="module-Entities_Communication_DataEndpointInterface.html">Entities/Communication/DataEndpointInterface</a></li><li><a href="module-Entities_Communication_DataEndpointInterfaceRW.html">Entities/Communication/DataEndpointInterfaceRW</a></li><li><a href="module-Entities_Core_FlectionProvider.html">Entities/Core/FlectionProvider</a></li><li><a href="module-Entities_Event_Namespace.html">Entities/Event/Namespace</a></li><li><a href="module-Exceptions_AccessDeniedException.html">Exceptions/AccessDeniedException</a></li><li><a href="module-Exceptions_GenericException.html">Exceptions/GenericException</a></li><li><a href="module-Exceptions_InvalidEntityException.html">Exceptions/InvalidEntityException</a></li><li><a href="module-Exceptions_InvalidStateException.html">Exceptions/InvalidStateException</a></li><li><a href="module-Exceptions_InvalidTypeException.html">Exceptions/InvalidTypeException</a></li><li><a href="module-Exceptions_NotFoundException.html">Exceptions/NotFoundException</a></li><li><a href="module-Exceptions_NotImplementedException.html">Exceptions/NotImplementedException</a></li><li><a href="module-Exceptions_RequestTimeoutException.html">Exceptions/RequestTimeoutException</a></li><li><a href="module-Exceptions_UnexpectedIdentifierException.html">Exceptions/UnexpectedIdentifierException</a></li><li><a href="module-Exceptions_UniquenessViolationException.html">Exceptions/UniquenessViolationException</a></li><li><a href="module-ObjectList.html">ObjectList</a></li><li><a href="module-Server_ConnectionProvider.html">Server/ConnectionProvider</a></li><li><a href="module-Server_ConnectionProviderSIO.html">Server/ConnectionProviderSIO</a></li><li><a href="module-Server_ConnectionProviderTLS.html">Server/ConnectionProviderTLS</a></li><li><a href="module-Server_IDGeneratorUUIDv4.html">Server/IDGeneratorUUIDv4</a></li><li><a href="module-Server_PersistentStorageFS.html">Server/PersistentStorageFS</a></li><li><a href="module-Storage_GenericStorage.html">Storage/GenericStorage</a></li><li><a href="module-UDBI_Core.html">UDBI/Core</a></li><li><a href="module-UDBI_EntityModel.html">UDBI/EntityModel</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeBigInteger.html">UDBI/FieldTypes/FieldTypeBigInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeFloat.html">UDBI/FieldTypes/FieldTypeFloat</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeGeneric.html">UDBI/FieldTypes/FieldTypeGeneric</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeInteger.html">UDBI/FieldTypes/FieldTypeInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeString.html">UDBI/FieldTypes/FieldTypeString</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeText.html">UDBI/FieldTypes/FieldTypeText</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp.html">UDBI/FieldTypes/FieldTypeTimestamp</a></li><li><a href="module-UDBI_ManyToOne.html">UDBI/ManyToOne</a></li><li><a href="module-UDBI_ObjectManager.html">UDBI/ObjectManager</a></li><li><a href="module-UDBI_OneToOne.html">UDBI/OneToOne</a></li><li><a href="module-UDBIAdapters_IDB.html">UDBIAdapters/IDB</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-This.html#.Request">Request</a></li><li><a href="-_anonymous_-This.Start.html">Start</a></li><li><a href="-_anonymous_-This.html#.Use">Use</a></li><li><a href="Client_StoreReducable%250ASee%2520classmodule_-PrefixedReducerManager.html">PrefixedReducerManager</a></li><li><a href="Client_StoreReducable%250ASee%2520classmodule_-StoreReducable.html">StoreReducable</a></li><li><a href="Client_UI_AssetManager%250ASee%2520classmodule_-AssetManager.html">AssetManager</a></li><li><a href="Client_UI_AssetType%250DSee%2520classmodule_-AssetType.html">AssetType</a></li><li><a href="CollectionEditor.html">CollectionEditor</a></li><li><a href="CookieStorage.html">CookieStorage</a></li><li><a href="Entities_Config_ConfigSet%250DSee%2520class%2520descriptionmodule_-ConfigSet.html">ConfigSet</a></li><li><a href="EntityDiffRequest.html">EntityDiffRequest</a></li><li><a href="EntityStorage.html">EntityStorage</a></li><li><a href="IllegalParallelEditException.html">IllegalParallelEditException</a></li><li><a href="LoginRequestInterface.html">LoginRequestInterface</a></li><li><a href="module.exports.html">exports</a></li><li><a href="module-Client_ComponentConnectorInterface-ComponentConnectorInterface.html">ComponentConnectorInterface</a></li><li><a href="module-Client_ComponentConnectorReducable-ComponentConnectorReducable.html">ComponentConnectorReducable</a></li><li><a href="module-Client_Store-PatchedStoreUpdate.html">PatchedStoreUpdate</a></li><li><a href="module-Client_Store-Store.html">Store</a></li><li><a href="module-Client_UI_UIXAlert-UIXAlert.html">UIXAlert</a></li><li><a href="module-Client_UI_UIXElement-UIXElement.html">UIXElement</a></li><li><a href="module-Client_UI_UIXGenericContainer-UIXGenericContainer.html">UIXGenericContainer</a></li><li><a href="module-Client_UI_UIXTemplate-UIXTemplate.html">UIXTemplate</a></li><li><a href="module-Client_UI_ViewComponent-ViewComponent.html">ViewComponent</a></li><li><a href="module-Client_UI_xInteraction-xInteraction.html">xInteraction</a></li><li><a href="module-Communication_CommunicationDataRequest-CommunicationDataRequest.html">CommunicationDataRequest</a></li><li><a href="module-Core_IDGeneratorNumeric-IDGeneratorNumeric.html">IDGeneratorNumeric</a></li><li><a href="module-Core_IDGenerator-IDGenerator.html">IDGenerator</a></li><li><a href="module-Core_UniqueNamespace-UniqueNamespace.html">UniqueNamespace</a></li><li><a href="module-Entities_Client_PersistentStorage.html">Entities/Client/PersistentStorage</a></li><li><a href="module-Entities_Communication_CommunicationSocket-CommunicationSocket.html">CommunicationSocket</a></li><li><a href="module-Entities_Communication_DataEndpointInterfaceRW-DataEndpointInterfaceRW.html">DataEndpointInterfaceRW</a></li><li><a href="module-Entities_Communication_DataEndpointInterface-DataEndpointInterface.html">DataEndpointInterface</a></li><li><a href="module-Entities_Event_Namespace-EventListenerEntry.html">EventListenerEntry</a></li><li><a href="module-Entities_Event_Namespace-EventNamespace_ListenerEntry.html">ListenerEntry</a></li><li><a href="module-Entities_Event_Namespace-EventNamespace_Register.html">Register</a></li><li><a href="module-Exceptions_AccessDeniedException.html">Exceptions/AccessDeniedException</a></li><li><a href="module-Exceptions_GenericException.html">Exceptions/GenericException</a></li><li><a href="module-Exceptions_InvalidEntityException.html">Exceptions/InvalidEntityException</a></li><li><a href="module-Exceptions_InvalidStateException.html">Exceptions/InvalidStateException</a></li><li><a href="module-Exceptions_InvalidTypeException.html">Exceptions/InvalidTypeException</a></li><li><a href="module-Exceptions_NotFoundException.html">Exceptions/NotFoundException</a></li><li><a href="module-Exceptions_NotImplementedException.html">Exceptions/NotImplementedException</a></li><li><a href="module-Exceptions_RequestTimeoutException.html">Exceptions/RequestTimeoutException</a></li><li><a href="module-Exceptions_UnexpectedIdentifierException.html">Exceptions/UnexpectedIdentifierException</a></li><li><a href="module-Exceptions_UniquenessViolationException.html">Exceptions/UniquenessViolationException</a></li><li><a href="module-ObjectList-ObjectList.html">ObjectList</a></li><li><a href="module-Server_ConnectionProviderTLS-ConnectionProviderTLS.html">ConnectionProviderTLS</a></li><li><a href="module-Server_ConnectionProvider-ConnectionProvider.html">ConnectionProvider</a></li><li><a href="module-Server_IDGeneratorUUIDv4-IDGeneratorUUIDv4.html">IDGeneratorUUIDv4</a></li><li><a href="module-Server_PersistentStorageFS.html">Server/PersistentStorageFS</a></li><li><a href="module-Storage_GenericStorage.html">Storage/GenericStorage</a></li><li><a href="module-UDBI_Core-UDBIDatabase.html">UDBIDatabase</a></li><li><a href="module-UDBI_Core-UDBITable.html">UDBITable</a></li><li><a href="module-UDBI_Core-UDBITableSchema.html">UDBITableSchema</a></li><li><a href="module-UDBI_EntityModel-UDBIEntityModel.html">UDBIEntityModel</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeBigInteger-FieldTypeBigInteger.html">FieldTypeBigInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeFloat-FieldTypeFloat.html">FieldTypeFloat</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeGeneric-FieldTypeGeneric.html">FieldTypeGeneric</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeInteger-FieldTypeInteger.html">FieldTypeInteger</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeString-FieldTypeString.html">FieldTypeString</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeText-FieldTypeText.html">FieldTypeText</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp-FieldTypeTimestamp.html">FieldTypeTimestamp</a></li><li><a href="module-UDBI_FieldTypes_FieldTypeTimestamp-FieldTypeTimestampValueNow.html">FieldTypeTimestampValueNow</a></li><li><a href="module-UDBI_ManyToOne-ManyToOne.html">ManyToOne</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager.html">ObjectManager</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager_Flush.html">Flush</a></li><li><a href="module-UDBI_ObjectManager-ObjectManager_Query.html">Query</a></li><li><a href="module-UDBI_ObjectManager-ObjectRepository.html">ObjectRepository</a></li><li><a href="module-UDBI_OneToOne-OneToOne.html">OneToOne</a></li><li><a href="module-UDBIAdapters_IDB-IDBDatabaseReference.html">IDBDatabaseReference</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManager.html">IDBObjectManager</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerCustomIndex.html">IDBObjectManagerCustomIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerGeneratedIndex.html">IDBObjectManagerGeneratedIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerIndex.html">IDBObjectManagerIndex</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerIndexEntry.html">IDBObjectManagerIndexEntry</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectManagerPrimaryKey.html">IDBObjectManagerPrimaryKey</a></li><li><a href="module-UDBIAdapters_IDB-IDBObjectQuery.html">IDBObjectQuery</a></li><li><a href="module-UDBIAdapters_IDB-IDBTable.html">IDBTable</a></li><li><a href="module-UDBIAdapters_IDB-IDBUDBIDatabase.html">IDBUDBIDatabase</a></li><li><a href="MySQLDatabase.html">MySQLDatabase</a></li><li><a href="MySQLDBConnectionDescriptor.html">MySQLDBConnectionDescriptor</a></li><li><a href="MySQLObjectManager.html">MySQLObjectManager</a></li><li><a href="MySQLSchemaBuilder.html">MySQLSchemaBuilder</a></li><li><a href="MySQLTable.html">MySQLTable</a></li><li><a href="PopupWindowController.html">PopupWindowController</a></li><li><a href="PropertyConstraint.html">PropertyConstraint</a></li><li><a href="PropertyConstraintAttached.html">PropertyConstraintAttached</a></li><li><a href="PropertyConstraintItemInList.html">PropertyConstraintItemInList</a></li><li><a href="PropertyEditor.html">PropertyEditor</a></li><li><a href="PropertyType.html">PropertyType</a></li><li><a href="PropertyTypeCollection.html">PropertyTypeCollection</a></li><li><a href="PropertyTypeObject.html">PropertyTypeObject</a></li><li><a href="SessionInterface.html">SessionInterface</a></li><li><a href="SyncAction.html">SyncAction</a></li><li><a href="SyncedEntityStorage.html">SyncedEntityStorage</a></li><li><a href="ViewWindowController.html">ViewWindowController</a></li><li><a href="WindowControllerInterface.html">WindowControllerInterface</a></li><li><a href="xDMS.UIX.Providers.assetManager.Resource.html">Resource</a></li></ul><h3>Interfaces</h3><ul><li><a href="SyncedPropertyTypeObjectInterface.html">SyncedPropertyTypeObjectInterface</a></li></ul><h3>Global</h3><ul><li><a href="global.html#FULL_TREE">FULL_TREE</a></li><li><a href="global.html#isObject">isObject</a></li><li><a href="global.html#rootEntityStorageCollection">rootEntityStorageCollection</a></li><li><a href="global.html#SPLIT_TREE">SPLIT_TREE</a></li><li><a href="global.html#ViewWindowsControllerDefaults">ViewWindowsControllerDefaults</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Jan 10 2021 14:05:14 GMT+0100 (Mitteleuropäische Normalzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
